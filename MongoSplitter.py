@@ -9,6 +9,7 @@ and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
 import logging
+import bson
 
 def calculate_splits(config):
     """reads config to find out what type of split to perform"""
@@ -22,13 +23,13 @@ def calculate_splits(config):
     collection_name = uri_info['collection']
 
     connection = Connection(uri)
-    db = connection[databaseName]
+    db = connection[database_name]
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
     useShards = False #config.canReadSplitsFromShards()
     useChunks = False #config.isShardChunkedSplittingEnabled()
-    laveOk = True #config.canReadSplitsFromSecondary()
+    slaveOk = True #config.canReadSplitsFromSecondary()
 
     logging.info(" Calculate Splits Code ... Use Shards? " + useShards + ", Use Chunks? " + useChunks + "; Collection Sharded? " + isSharded);
 
@@ -50,11 +51,37 @@ def calculate_splits(config):
         return calculate_single_split( config );
 
 
+
 def calculate_unsharded_splits(config, etc):
     """@todo: Docstring for calculate_unsharded_splits
 
     :returns: @todo
+
     """
+    #create command
+    #command to split should look like this VV
+    #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', False), ('keyPattern', {'x': 1})])
+    split_key  = config.get('splitKey')
+    split_size = config.get('splitSize')
+    full_name  = config.get('full_name')
+    logging.info("Calculating unsharded splits on collection %s with Split Key %s" % (full_name, split_key))
+    logging.info("Max split size :: %sMB" % split_size)
+
+
+    cmd = bson.bson.SON()
+    cmd["splitVector"]  = full_name
+    cmd["maxChunkSize"] = split_size
+    cmd["keyPattern"]   = split_key
+    cmd["force"]        = False
+
+    # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
+    connection = Connection(uri)
+    db = connection[database_name]
+    split_results = db.command(cmd)
+
+    if split_results:
+        logging.info()
+
     pass
 
 def _split(config, etc):
