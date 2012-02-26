@@ -24,6 +24,8 @@ class MongoInputSplit():
         self.limit = limit
         self.skip = skip
         self.noTimeout = noTimeout
+        
+        self.curson = getCursor()
 
 
     def write(self, out):
@@ -49,6 +51,8 @@ class MongoInputSplit():
         :returns: a cursor with the split's query
         """
         pass
+        
+        
 
     def get_BSON_encoder(self):
         """@todo: Docstring for get_BSON_encoder

@@ -70,7 +70,7 @@ def calculate_unsharded_splits(config, etc):
     logging.info("Max split size :: %sMB" % split_size)
 
 
-    cmd = bson.bson.SON()
+    cmd = bson.son.SON()
     cmd["splitVector"]  = full_name
     cmd["maxChunkSize"] = split_size
     cmd["keyPattern"]   = split_key
@@ -107,13 +107,25 @@ def calculate_unsharded_splits(config, etc):
     return splits
 
 
-def _split(config, etc):
+def _split(config, q, min, max):
     """@todo: Docstring for _split
 
     :returns: an actual MongoSplit object
     """
-    pass
-
+	query = bson.son.SON()
+    query["$query"]  = q
+    
+    if min:
+        query["$min"] = min
+    
+    if max:
+        query["$max"] = max
+    
+    logging.trace("Assembled Query: " + query)
+    
+    return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(), 
+                            config.getSort(), config.getLimit(), config.getSkip(), config.isNoTimeout() )
+    
 def calculate_single_split(config):
     pass
 
