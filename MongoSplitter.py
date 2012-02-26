@@ -58,6 +58,8 @@ def calculate_unsharded_splits(config, etc):
     :returns: @todo
 
     """
+    splits = [] #will return this list
+
     #create command
     #command to split should look like this VV
     #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', False), ('keyPattern', {'x': 1})])
@@ -77,12 +79,33 @@ def calculate_unsharded_splits(config, etc):
     # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
     connection = Connection(uri)
     db = connection[database_name]
-    split_results = db.command(cmd)
+    logging.debug("Issuing Command: %s" % cmd)
+    data = db.command(cmd)
 
-    if split_results:
-        logging.info()
+    #results look like this VV
+    #{u'ok': 1.0, u'splitKeys': [{u'_id': ObjectId('4f49775348d9846c5e582b00')}, {u'_id': ObjectId('4f49775548d9846c5e58553b')}]}
 
-    pass
+    if data.get("err"):
+        raise Exception(data.get("err"))
+    elif data.get("ok") is not 1.0:
+        raise Exception("Unable to calculate splits")
+
+
+    split_data = data.get('splitKeys')
+    if not split_data:
+        logging.warning("WARNING: No Input Splits were calculated by the split code.  Proceeding with a *single* split. Data may be too small, try lowering 'mongo.input.split_size'  if this is undesirable.")
+    else:
+        logging.info("Calculated %s splits" % len(split_data))
+
+        # TODO: what is the query q parameter? (02/26/12, 12:18, AFlock)
+        last_key = None
+        for bound in split_data:
+            splits.append(_split(conf, q, last_key, bound))
+            last_key = bound
+        splits.append(_split(conf, q, last_key, None))
+
+    return splits
+
 
 def _split(config, etc):
     """@todo: Docstring for _split
