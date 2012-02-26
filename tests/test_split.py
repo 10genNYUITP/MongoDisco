@@ -1,6 +1,6 @@
 import unittest
 import pymongo
-import MongoInputSplit, MongoSplitter
+from app.MongoSplitter import MongoSplitter
 import datetime
 import bson
 
