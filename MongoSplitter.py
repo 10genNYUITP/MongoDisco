@@ -21,7 +21,8 @@ from pymongo.uri_parser import (_partition,
 def calculate_splits(config):
     """reads config to find out what type of split to perform"""
     #pass
-    uri = "mongodb://localhost/test.in" #config.getInputURI()
+    uri = config.get("inputURI") if "inputURI" in config else "mongodb://localhost/test.in"
+    #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
 
     host = uri_info['nodelist'][0][0]
@@ -120,21 +121,21 @@ def _split(config, q, min, max):
     """
 	query = bson.son.SON()
     query["$query"]  = q
-    
+
     if min:
         query["$min"] = min
-    
+
     if max:
         query["$max"] = max
-    
+
     logging.trace("Assembled Query: " + query)
-    
-    return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(), 
+
+    return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(),
                             config.getSort(), config.getLimit(), config.getSkip(), config.isNoTimeout() )
-    
+
 def calculate_single_split(config):
     #pass
-    
+
 
 def calculate_sharded_splits(config, etc):
     """Worry about this after unsharded splits are doen
@@ -171,8 +172,8 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     orig_URI_string = SCHEME_LEN
     server_end = -1
     server_start = 0
-   
-    """to find the last index of / in the original URI string """ 
+
+    """to find the last index of / in the original URI string """
     idx = orig_URI_string[::-1].find("/")
     if idx < 0:
         server_end = len(orig_URI_string)
@@ -182,7 +183,7 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     idx = orig_URI_string.find("@")
 
     if idx > 0:
-        server_start = idx + 1 
+        server_start = idx + 1
 
     sb = orig_URI_string
     sb.replace(orig_URI_string[server_start:server_end], new_URI)

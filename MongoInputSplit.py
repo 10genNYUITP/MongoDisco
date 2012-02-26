@@ -24,8 +24,10 @@ class MongoInputSplit():
         self.limit = limit
         self.skip = skip
         self.noTimeout = noTimeout
-        
-        self.curson = getCursor()
+
+        self.cursor = get_cursor()
+        # access like : split.cursor
+        # not : split.get_cursor()
 
 
     def write(self, out):
@@ -46,13 +48,14 @@ class MongoInputSplit():
         pass
 
     def get_cursor(self):
-        """@todo: Docstring for get_cursor
+        """Do a find operation
 
         :returns: a cursor with the split's query
         """
+
         pass
-        
-        
+
+
 
     def get_BSON_encoder(self):
         """@todo: Docstring for get_BSON_encoder
@@ -74,5 +77,7 @@ class MongoInputSplit():
         """@todo: Docstring for hashCode
         :returns: @todo
         """
-
         pass
+
+    def __str__(self):
+        return self.cursor
