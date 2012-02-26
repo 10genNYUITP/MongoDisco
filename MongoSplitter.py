@@ -11,6 +11,13 @@ from pymongo import Connection, uri_parser
 import logging
 import bson
 
+from pymongo.uri_parser import (_partition,
+                                _rpartition,
+                                parse_userinfo,
+                                split_hosts,
+                                split_options,
+                                parse_uri)
+
 def calculate_splits(config):
     """reads config to find out what type of split to perform"""
     #pass
@@ -109,13 +116,13 @@ def calculate_unsharded_splits(config, etc):
 
 def _split(config, etc):
     """@todo: Docstring for _split
-
     :returns: an actual MongoSplit object
     """
-    pass
+#    pass
 
 def calculate_single_split(config):
-    pass
+    #pass
+    
 
 def calculate_sharded_splits(config, etc):
     """Worry about this after unsharded splits are doen
@@ -140,7 +147,7 @@ def fetch_splits_via_chunks(config):
     """
     pass
 
-def get_new_URI(original_URI, etc):
+def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
 
     :original_URI: @todo
@@ -148,7 +155,31 @@ def get_new_URI(original_URI, etc):
     :returns: a new Mongo_URI
     """
 
-    pass
+#    pass
+    orig_URI_string = SCHEME_LEN
+    server_end = -1
+    server_start = 0
+   
+    """to find the last index of / in the original URI string """ 
+    idx = orig_URI_string[::-1].find("/")
+    if idx < 0:
+        server_end = len(orig_URI_string)
+    else:
+        server_end = idx
 
+    idx = orig_URI_string.find("@")
 
+    if idx > 0:
+        server_start = idx + 1 
 
+    sb = orig_URI_string
+    sb.replace(orig_URI_string[server_start:server_end], new_URI)
+    if slave_OK != null:
+        if "?" in orig_URI_string:
+            sb.append("&slaveok=").append(slave_OK)
+        else
+            sb.append("?slaveok=").append(slave_OK)
+
+    ans = SCHEME + sb
+    logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans )
+    return ans
