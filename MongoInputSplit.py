@@ -52,6 +52,28 @@ class MongoInputSplit():
 
         :returns: a cursor with the split's query
         """
+        
+        if self.cursor is None:
+            
+            ''' @todo Encasuplate these stuff into MongoConfigUtil
+                call like MongoConfigUtil.getCollection(URI)
+            '''
+            uri_info = uri_parser.parse_uri(uri)
+            host = uri_info['nodelist'][0][0]
+            port = uri_info['nodelist'][0][1]
+            database_name = uri_info['database']
+            collection_name = uri_info['collection']
+            
+            connection = Connection(uri)
+            db = connection[database_name]
+            collection = db[collection_name]
+            self.cursor = collection.find(query,fields) #.sort(sortSpec) doesn't work? 
+                                                   # @todo support limit/skip --CW
+            if self.noTimeout:
+                self.cursor.add_option()
+            
+            # self.cursor.slaveOk() read from the slave(s) by using slaveOk
+            # find how to do it in python --CW
 
         pass
 
