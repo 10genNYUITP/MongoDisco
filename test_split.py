@@ -1,14 +1,17 @@
 import unittest
 import pymongo
-from app.MongoSplitter import MongoSplitter
+from app import MongoInputSplit as MI
+from app import MongoSplitter as MS
 import datetime
 import bson
 
 config = {
-        "db_name" : "test",
-        "collection_name" : "in",
-        "splitSize" : "2", #MB
-        "inputURI" : "mongodb://localhost/test.in"
+        "db_name": "test",
+        "collection_name": "in",
+        "splitSize": 1, #MB
+        "inputURI": "mongodb://localhost/test.in",
+        "createInputSplits": True,
+        "splitKey": {'_id' : 1},
         }
 
 class TestSplits(unittest.TestCase):
@@ -17,10 +20,14 @@ class TestSplits(unittest.TestCase):
         conn = pymongo.Connection()
         db = conn[config.get('db_name')]
         coll = db[config.get('collection_name')]
-        print db.command("collstats", config.get('collection_name'))
+        #print db.command("collstats", coll.full_name)
+        '''
         for i in range(20000):
             post = {"name" : i, "date": datetime.datetime.utcnow()}
             coll.insert(post)
+        '''
+
+        print coll.count()
 
         command = bson.son.SON()
         command['splitVector'] = coll.full_name
@@ -31,10 +38,11 @@ class TestSplits(unittest.TestCase):
 
         man_splits = results.get("splitKeys")
         assert results.get('ok') == 1.0, 'split command did not return with 1.0 ok'
+        print results
         assert man_splits, 'no splitKeys returned'
 
         #now do it through MongoSplit
-        splits = MongoSplitter.calculate_splits(config)
+        splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
         assert len(man_splits) == len(splits), "MongoSplitter returned a different number of splits than manual splits"
