@@ -27,7 +27,7 @@ class TestSplits(unittest.TestCase):
             coll.insert(post)
         '''
 
-        print coll.count()
+        #print coll.count()
 
         command = bson.son.SON()
         command['splitVector'] = coll.full_name
@@ -38,15 +38,16 @@ class TestSplits(unittest.TestCase):
 
         man_splits = results.get("splitKeys")
         assert results.get('ok') == 1.0, 'split command did not return with 1.0 ok'
-        print results
+        #print results
+        #print len(man_splits)
         assert man_splits, 'no splitKeys returned'
 
         #now do it through MongoSplit
         splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
-        print splits
-        assert len(man_splits) == len(splits), "MongoSplitter returned a different number of splits than manual splits"
+        #print len(splits)
+        assert len(man_splits) + 1 == len(splits) , "MongoSplitter returned a different number of splits than manual splits"
 
 if __name__ == '__main__':
     unittest.main()

@@ -28,7 +28,6 @@ def calculate_splits(config):
     #HACK -> make config align with this ^^
     config['inputURI'] = uri
     #/HACK
-    print "::: URI ::: %s"% config['inputURI']
 
     #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
