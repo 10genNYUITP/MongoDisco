@@ -45,6 +45,7 @@ class TestSplits(unittest.TestCase):
         splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
+        print splits
         assert len(man_splits) == len(splits), "MongoSplitter returned a different number of splits than manual splits"
 
 if __name__ == '__main__':

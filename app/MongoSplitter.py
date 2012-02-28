@@ -8,6 +8,8 @@ Description: Will calculate splits for a given collection/database
 and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
+from MongoInputSplit import MongoInputSplit
+
 import logging
 import bson
 
@@ -22,6 +24,12 @@ def calculate_splits(config):
     """reads config to find out what type of split to perform"""
     #pass
     uri = config.get("inputURI") if "inputURI" in config else "mongodb://localhost/test.in"
+
+    #HACK -> make config align with this ^^
+    config['inputURI'] = uri
+    #/HACK
+    print "::: URI ::: %s"% config['inputURI']
+
     #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
 
@@ -73,6 +81,8 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     db = connection[config["db_name"]]
     coll = db[config.get('collection_name')]
 
+    q = {} if not "query" in config else config.get("query")
+
 
 
     #create command
@@ -120,7 +130,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     return splits
 
 
-def _split(config, q, min, max):
+def _split(config=None, q={}, min=None, max=None):
     """@todo: Docstring for _split
     :returns: an actual MongoSplit object
     """
@@ -133,10 +143,18 @@ def _split(config, q, min, max):
     if max:
         query["$max"] = max
 
-    logging.trace("Assembled Query: " + query)
+    logging.info("Assembled Query: " , query)
 
-    return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(),
-                            config.getSort(), config.getLimit(), config.getSkip(), config.isNoTimeout() )
+    return MongoInputSplit(
+            config.get("inputURI"),
+            config.get("inputKey"),
+            query,
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit"),
+            config.get("skip"),
+            config.get("is_no_timeout")
+            )
 
 def calculate_single_split(config):
     pass
