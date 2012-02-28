@@ -4,10 +4,20 @@ from app import MongoInputSplit as MI
 from app import MongoSplitter as MS
 import datetime
 import bson
+import logging
 
 config = {
         "db_name": "test",
         "collection_name": "in",
+        "splitSize": 1, #MB
+        "inputURI": "mongodb://localhost/test.in",
+        "createInputSplits": True,
+        "splitKey": {'_id' : 1},
+        }
+
+config2 = {
+        "db_name": "test",
+        "collection_name": "tempSplit",
         "splitSize": 1, #MB
         "inputURI": "mongodb://localhost/test.in",
         "createInputSplits": True,
@@ -20,9 +30,9 @@ class TestSplits(unittest.TestCase):
         conn = pymongo.Connection()
         db = conn[config.get('db_name')]
         coll = db[config.get('collection_name')]
-        #print db.command("collstats", coll.full_name)
-        '''
-        for i in range(20000):
+        print coll.full_name
+        
+        '''for i in range(20000):
             post = {"name" : i, "date": datetime.datetime.utcnow()}
             coll.insert(post)
         '''
@@ -39,15 +49,24 @@ class TestSplits(unittest.TestCase):
         man_splits = results.get("splitKeys")
         assert results.get('ok') == 1.0, 'split command did not return with 1.0 ok'
         #print results
-        #print len(man_splits)
+        print 'man_splits = ', len(man_splits)
         assert man_splits, 'no splitKeys returned'
 
         #now do it through MongoSplit
         splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
-        #print len(splits)
+        print len(splits)
         assert len(man_splits) + 1 == len(splits) , "MongoSplitter returned a different number of splits than manual splits"
 
+        base_name = config2.get('collection_name')
+        for j, i in enumerate(splits):
+            coll_name = base_name + str(j)
+	    coll = db[coll_name]
+            coll.insert(i.cursor)
+            
+             
+
 if __name__ == '__main__':
+    #logging.getLogger().setLevel(logging.DEBUG)
     unittest.main()
