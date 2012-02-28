@@ -33,6 +33,10 @@ class MongoInputSplit():
         self.noTimeout = noTimeout
 
 
+        #self.cursor = self.get_cursor()
+        #TODO this ^^  feels weird and very un-pythonic to me... -AF 2/27/12
+        #replacing for now with below code VV
+
         #Assign cursor
         uri_info = uri_parser.parse_uri(inputURI)
         host = uri_info['nodelist'][0][0]
@@ -45,14 +49,11 @@ class MongoInputSplit():
         collection = db[collection_name]
         self.cursor = collection.find(query,fields) #.sort(sortSpec) doesn't work?
                                                # @todo support limit/skip --CW
+
         if self.noTimeout:
+            # TODO should be something else? blank for now
             self.cursor.add_option()
 
-        #TODO this feels weird and very un-pythonic to me... -AF 2/27/12
-        #replacing for now with above code ^^
-        #self.cursor = self.get_cursor()
-        # access like : split.cursor
-        # not : split.get_cursor()
 
 
     def write(self, out):

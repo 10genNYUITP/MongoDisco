@@ -1,3 +1,4 @@
+import sys, os, logging
 import unittest
 import pymongo
 from app import MongoInputSplit as MI
@@ -22,7 +23,8 @@ class TestSplits(unittest.TestCase):
         coll = db[config.get('collection_name')]
         #print db.command("collstats", coll.full_name)
         '''
-        for i in range(20000):
+        NOTE: need to run this code once to populate the database, after that comment it out
+        for i in range(40000):
             post = {"name" : i, "date": datetime.datetime.utcnow()}
             coll.insert(post)
         '''
@@ -46,8 +48,19 @@ class TestSplits(unittest.TestCase):
         splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
-        #print len(splits)
+        print splits
         assert len(man_splits) + 1 == len(splits) , "MongoSplitter returned a different number of splits than manual splits"
 
+        #if we have them, we want to them write each chunk into a temp database
+
+class TestDiscoInput(unittest.TestCase):
+    def runTest(self):
+        pass
+
+class TestDiscoInput(unittest.TestCase):
+    def runTest(self):
+        pass
+
 if __name__ == '__main__':
+    logging.getLogger().setLevel(logging.DEBUG)
     unittest.main()
