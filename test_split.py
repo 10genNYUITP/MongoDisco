@@ -15,6 +15,15 @@ config = {
         "splitKey": {'_id' : 1},
         }
 
+config2 = {
+        "db_name": "test",
+        "collection_name": "tempSplit",
+        "splitSize": 1, #MB
+        "inputURI": "mongodb://localhost/test.in",
+        "createInputSplits": True,
+        "splitKey": {'_id' : 1},
+        }
+
 class TestSplits(unittest.TestCase):
     def runTest(self):
         #put 20000 objects in a database, call for a split by hand, then a split by the class
@@ -41,25 +50,23 @@ class TestSplits(unittest.TestCase):
         man_splits = results.get("splitKeys")
         assert results.get('ok') == 1.0, 'split command did not return with 1.0 ok'
         #print results
-        #print len(man_splits)
+        print 'man_splits = ', len(man_splits)
         assert man_splits, 'no splitKeys returned'
 
         #now do it through MongoSplit
         splits = MS.calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
-        print splits
+        print len(splits)
         assert len(man_splits) + 1 == len(splits) , "MongoSplitter returned a different number of splits than manual splits"
 
-        #if we have them, we want to them write each chunk into a temp database
+        base_name = config2.get('collection_name')
+        for j, i in enumerate(splits):
+            coll_name = base_name + str(j)
+	    coll = db[coll_name]
+            coll.insert(i.cursor)
 
-class TestDiscoInput(unittest.TestCase):
-    def runTest(self):
-        pass
 
-class TestDiscoInput(unittest.TestCase):
-    def runTest(self):
-        pass
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
