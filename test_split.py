@@ -63,7 +63,7 @@ class TestSplits(unittest.TestCase):
         base_name = config2.get('collection_name')
         for j, i in enumerate(splits):
             coll_name = base_name + str(j)
-	    coll = db[coll_name]
+            coll = db[coll_name]
             coll.insert(i.cursor)
 
 
