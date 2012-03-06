@@ -39,9 +39,9 @@ def calculate_splits(config):
     useChunks = False #config.isShardChunkedSplittingEnabled()
     slaveOk = True #config.canReadSplitsFromSecondary()
 
-    logging.info(" Calculate Splits Code ... Use Shards? " + useShards + ", Use Chunks? " + useChunks + "; Collection Sharded? " + isSharded);
+    logging.info(" Calculate Splits Code ... \n:: Use Shards? -> %s \n:: Use Chunks? -> %s \n:: Collection Sharded? -> %s" % (useShards, useChunks, isSharded));
 
-    if config.createInputSplits():
+    if config.get("createInputSplits"):
         logging.info( "Creation of Input Splits is enabled." )
         if isSharded and (useShards or useChunks):
             if useShards and useChunks:
@@ -128,7 +128,7 @@ def _split(config, q, min, max):
     if max:
         query["$max"] = max
 
-    logging.trace("Assembled Query: " + query)
+    logging.info("Assembled Query: %s" % query)
 
     return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(),
                             config.getSort(), config.getLimit(), config.getSkip(), config.isNoTimeout() )
