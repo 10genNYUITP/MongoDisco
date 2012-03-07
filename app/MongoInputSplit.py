@@ -127,3 +127,19 @@ class MongoInputSplit():
 
     def __str__(self):
         return self.cursor
+
+    def format_uri_with_query(self):
+        """
+        returns a formatted uri like scheme_mongo expects
+        we put the query object in a json'd list so we can put it back
+        into an ordered SON
+        """
+        base = self.inputURI
+        #query is a bson object
+        #- need to convert to a list of tuples and jsonify
+        o_l = []
+        for k,v in query.iteritems():
+            o_l.append((k,v))
+
+        base += json.dumps(o_l)
+        return base
