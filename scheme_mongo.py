@@ -2,12 +2,10 @@ import pymongo
 from pymongo import Connection, uri_parser
 
 def open(url=None, task=None):
-    #parses a mongodb uri and returns the database??
-    #say url is mongo://dbname.collectionName
-
-    uri = url if url else "mongodb://localhost/test.in"
+    #parses a mongodb uri and returns the database
     #"mongodb://localhost/test.in?query='SON[()]'"
-    #config.getInputURI()
+    uri = url if url else "mongodb://localhost/test.in"
+
     uri_info = uri_parser.parse_uri(uri)
     params = uri.split('?', 1)
     query = None
@@ -16,7 +14,6 @@ def open(url=None, task=None):
         params = params[1]
         name, query = params.split('=')
         #turn the query into a SON object
-
 
     if not query:
         query = {}
@@ -28,17 +25,16 @@ def open(url=None, task=None):
 
     cursor =  collection.find(query) #.sort(sortSpec) doesn't work?
     #get all
-    results =  [entry for entry in cursor]
-    return results
-    print params
+    return [entry for entry in cursor]
 
-    print uri_info
 
 
 
 def input_stream(size, url, params):
-    return open()
+    return open(url)
+
 
 if __name__ == '__main__':
+    #just for testing
     print open()
 
