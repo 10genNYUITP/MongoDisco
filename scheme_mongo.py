@@ -6,21 +6,39 @@ def open(url=None, task=None):
     #say url is mongo://dbname.collectionName
 
     uri = url if url else "mongodb://localhost/test.in"
+    #"mongodb://localhost/test.in?query='SON[()]'"
     #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
+    params = uri.split('?', 1)
+    query = None
+    #TODO flow from a query
+    if len(params) > 1 :
+        params = params[1]
+        name, query = params.split('=')
+        #turn the query into a SON object
 
-    print uri_info
-    return
-    host = uri_info['nodelist'][0][0]
-    port = uri_info['nodelist'][0][1]
+
+    if not query:
+        query = {}
+    connection = Connection(uri)
     database_name = uri_info['database']
     collection_name = uri_info['collection']
-    #connect to mongodb
-    return mongodb
+    db = connection[database_name]
+    collection = db[collection_name]
+
+    cursor =  collection.find(query) #.sort(sortSpec) doesn't work?
+    #get all
+    results =  [entry for entry in cursor]
+    return results
+    print params
+
+    print uri_info
+
+
 
 def input_stream(size, url, params):
     return open()
 
 if __name__ == '__main__':
-    open()
+    print open()
 
