@@ -44,6 +44,9 @@ class MongoWrapper(object):
     supports the following operations: """
 
     #for now, I am treating the quata of this object as one record (may need to change to bytes but hopefully not) -AF 3/10/12
+    # Referencing lib/disco/comm.py,
+    # but I think much of the internals of that can be simplified in our case since reading from mongo is much easier than reading from a url connection
+    # for instance, I think the StringIO buffer may not be necessary at all -AF 3/10
 
     def __init__(self, cursor):
         self.cursor.batchsize(1) #so will only return one result per request
@@ -75,6 +78,7 @@ class MongoWrapper(object):
         buf = StringIO()
         #write a record to buf if record
         if size > 0:
+            #seems a bit roundabout if buf.getValue just returns whatever we wrote to it
             records = self._read_chunk(size)
             buf.write(records)
         return buf.getValue()
