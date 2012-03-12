@@ -1,4 +1,5 @@
 import pymongo
+from cStringIO import StringIO
 from pymongo import Connection, uri_parser
 import bson.son as son
 import json
@@ -30,8 +31,92 @@ def open(url=None, task=None):
     collection = db[collection_name]
 
     cursor =  collection.find(query) #.sort(sortSpec) doesn't work?
-    #get all
-    return [entry for entry in cursor]
+    #get all  or just cursor? - basically we need to specify how to read this data somewhere.
+    #return [entry for entry in cursor]
+
+    wrapper = MongoWrapper(cursor)
+    return wrapper
+    #WRAPPED!
+
+
+class MongoWrapper(object):
+    """Want to wrap the cursor in an object that
+    supports the following operations: """
+
+    #for now, I am treating the quata of this object as one record (may need to change to bytes but hopefully not) -AF 3/10/12
+
+    def __init__(self, cursor):
+        self.cursor.batchsize(1) #so will only return one result per request
+        self.cursor = cursor
+        self.buf = None
+        self.offset = 0
+        self.orig_offset = 0
+        self.eof = False #!self.cursor.alive (needs update after every read?
+        self.read(1)
+        self.i = 0 #Dont understand what self.i is really for... some intermediate offset? A count of how much has been read?
+
+    def __iter__(self):
+        #most important method
+        chunk = self._read_chunk(1)
+        while chunk:
+            next_chunk = self._read_chunk(1)
+            yield chunk
+            chunk = next_chunk
+
+    def __len__(self):
+        #need to do this more dynamically (see lib/disco/comm.py ln 163)
+        # in order for _read_chunk to work properly
+        return self.cursor.count()
+
+    def close(self):
+        self.cursor.close()
+
+    def read(self, size=-1):
+        buf = StringIO()
+        #write a record to buf if record
+        if size > 0:
+            records = self._read_chunk(size)
+            buf.write(records)
+        return buf.getValue()
+
+
+    def _read_chunk(self, n):
+        #not needed if we have records as quanta?
+        #this should return n records in that case -AF 3/10
+        if self.buf is None or self.i >= len(self.buf):
+            if not self.cursor.alive:
+                return ''
+            self.i = 0
+            self.buf = StringIO()
+        ret = self.cursor[self.offset: self.offset+n]
+        # or ret = self.cursor.find(skip = self.offset, limit=n) ?
+        self.offset += n
+        self.i += n
+        return ret
+
+
+    def tell(self):
+        #some sort of positioning info
+        return self.orig_offset + self.i
+        pass
+
+    def seek(self, pos, mode=0):
+        #changes internal positioning variables
+        #i.e does not actually change the cursor position
+        #and read must be positioned relative to these variables
+        if mode == 0:
+            self.offset = pos
+        elif mode ==1:
+            self.offset = self.tell() + pos
+        else:
+            self.offset = len(self) - pos
+        self.eof = False
+        self.buf = None
+        self.orig_offset = self.offset
+        self.i = 0
+
+
+
 
 
 
