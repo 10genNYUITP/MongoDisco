@@ -49,8 +49,8 @@ class MongoWrapper(object):
     # for instance, I think the StringIO buffer may not be necessary at all -AF 3/10
 
     def __init__(self, cursor):
-        self.cursor.batchsize(1) #so will only return one result per request
         self.cursor = cursor
+        #self.cursor.batchsize(1) #so will only return one result per request
         self.buf = None
         self.offset = 0
         self.orig_offset = 0
@@ -80,7 +80,8 @@ class MongoWrapper(object):
         if size > 0:
             #seems a bit roundabout if buf.getValue just returns whatever we wrote to it
             records = self._read_chunk(size)
-            buf.write(records)
+            #todo : put records in a string format?
+            buf.write(records[0].__str__())
         return buf.getValue()
 
 
@@ -92,7 +93,7 @@ class MongoWrapper(object):
                 return ''
             self.i = 0
             self.buf = StringIO()
-        ret = self.cursor[self.offset: self.offset+n]
+        ret = [record for record in self.cursor[self.offset: self.offset+n]]
         # or ret = self.cursor.find(skip = self.offset, limit=n) ?
         self.offset += n
         self.i += n
