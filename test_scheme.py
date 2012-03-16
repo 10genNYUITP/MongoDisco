@@ -7,6 +7,8 @@ class TestScheme(unittest.TestCase):
         assert wrapper
         for result in wrapper:
             print result
+            assert result
+            break
 
 if __name__ == '__main__':
     unittest.main()

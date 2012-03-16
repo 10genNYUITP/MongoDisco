@@ -51,20 +51,25 @@ class MongoWrapper(object):
     def __init__(self, cursor):
         self.cursor = cursor
         #self.cursor.batchsize(1) #so will only return one result per request
-        self.buf = None
+        #self.buf = None
         self.offset = 0
-        self.orig_offset = 0
-        self.eof = False #!self.cursor.alive (needs update after every read?
-        self.read(1)
-        self.i = 0 #Dont understand what self.i is really for... some intermediate offset? A count of how much has been read?
+        #self.orig_offset = 0
+        #self.eof = False #!self.cursor.alive (needs update after every read?
+        #self.read(1)
+        #self.i = 0 #Dont understand what self.i is really for... some intermediate offset? A count of how much has been read?
 
     def __iter__(self):
         #most important method
+        #get
+        for rec in self.cursor:
+            yield rec
+        '''
         chunk = self._read_chunk(1)
         while chunk:
             next_chunk = self._read_chunk(1)
             yield chunk
             chunk = next_chunk
+        '''
 
     def __len__(self):
         #need to do this more dynamically (see lib/disco/comm.py ln 163)
@@ -73,6 +78,7 @@ class MongoWrapper(object):
 
     def close(self):
         self.cursor.close()
+'''
 
     def read(self, size=-1):
         buf = StringIO()
@@ -82,19 +88,20 @@ class MongoWrapper(object):
             records = self._read_chunk(size)
             #todo : put records in a string format?
             buf.write(records[0].__str__())
-        return buf.getValue()
+        return buf.getvalue()
 
 
     def _read_chunk(self, n):
         #not needed if we have records as quanta?
         #this should return n records in that case -AF 3/10
-        if self.buf is None or self.i >= len(self.buf):
+        if self.buf is None:
             if not self.cursor.alive:
                 return ''
             self.i = 0
             self.buf = StringIO()
-        ret = [record for record in self.cursor[self.offset: self.offset+n]]
-        # or ret = self.cursor.find(skip = self.offset, limit=n) ?
+        #recs = self.cursor[self.offset: self.offset+n]
+        #ret = [record for record in recs]
+        ret = self.cursor.find(skip = self.offset, limit=n)
         self.offset += n
         self.i += n
         return ret
@@ -121,6 +128,7 @@ class MongoWrapper(object):
         self.i = 0
 
 
+'''
 
 
 
