@@ -62,7 +62,7 @@ class MongoWrapper(object):
         #most important method
         #get
         for rec in self.cursor:
-            yield rec
+            yield rec.__str__()
         '''
         chunk = self._read_chunk(1)
         while chunk:
@@ -134,7 +134,7 @@ class MongoWrapper(object):
 
 
 
-def input_stream(size, url, params):
+def input_stream(stream, size, url, params):
     return open(url)
 
 
