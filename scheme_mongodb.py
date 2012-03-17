@@ -20,7 +20,7 @@ def open(url=None, task=None):
         query = son.SON()
         li_q = json.loads(json_query)
         for tupl in li_q:
-            final_query[tupl[0]] = tupl[1]
+            query[tupl[0]] = tupl[1]
     if not query:
         query = {}
 

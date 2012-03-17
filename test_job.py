@@ -1,6 +1,8 @@
 from disco.core import Job, result_iterator
+import logging
 
 def map(record, params):
+    logging.info("%s" % record.get('_id'))
     yield record.get('name', "NoName"), 1
 
 def reduce(iter, params):
