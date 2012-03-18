@@ -78,17 +78,20 @@ class MongoWrapper(object):
 
     def close(self):
         self.cursor.close()
-'''#{{{
 
     def read(self, size=-1):
-        buf = StringIO()
+        #buf = StringIO()
         #write a record to buf if record
+        list_of_records = []
         if size > 0:
+            for i in range(size):
+                list_of_records.append(self.cursor.__iter__())
             #seems a bit roundabout if buf.getValue just returns whatever we wrote to it
-            records = self._read_chunk(size)
+            #records = self._read_chunk(size)
             #todo : put records in a string format?
-            buf.write(records[0].__str__())
-        return buf.getvalue()
+            #buf.write(records[0].__str__())
+        return list_of_records
+'''#{{{
 
 
     def _read_chunk(self, n):
