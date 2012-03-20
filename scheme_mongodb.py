@@ -1,4 +1,5 @@
 import pymongo
+import warnings
 from cStringIO import StringIO
 from pymongo import Connection, uri_parser
 import bson.son as son
@@ -24,19 +25,21 @@ def open(url=None, task=None):
     if not query:
         query = {}
 
-    connection = Connection(uri)
-    database_name = uri_info['database']
-    collection_name = uri_info['collection']
-    db = connection[database_name]
-    collection = db[collection_name]
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        connection = Connection(uri)
+        database_name = uri_info['database']
+        collection_name = uri_info['collection']
+        db = connection[database_name]
+        collection = db[collection_name]
 
-    cursor =  collection.find(query) #.sort(sortSpec) doesn't work?
-    #get all  or just cursor? - basically we need to specify how to read this data somewhere.
-    #return [entry for entry in cursor]
+        cursor =  collection.find(query) #.sort(sortSpec) doesn't work?
+        #get all  or just cursor? - basically we need to specify how to read this data somewhere.
+        #return [entry for entry in cursor]
 
-    wrapper = MongoWrapper(cursor)
-    return wrapper
-    #WRAPPED!
+        wrapper = MongoWrapper(cursor)
+        return wrapper
+        #WRAPPED!
 
 
 class MongoWrapper(object):
@@ -79,6 +82,7 @@ class MongoWrapper(object):
     def close(self):
         self.cursor.close()
 
+    @property
     def read(self, size=-1):
         #buf = StringIO()
         #write a record to buf if record
@@ -139,7 +143,7 @@ class MongoWrapper(object):
 
 def input_stream(stream, size, url, params):
     mon = open(url)
-    return mon, len(mon), url
+    return mon
 
 
 if __name__ == '__main__':
