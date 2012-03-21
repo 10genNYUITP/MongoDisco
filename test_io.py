@@ -1,5 +1,6 @@
 from disco.core import Job, result_iterator
-from mongodb_io import mongodb_output_stream
+from mongodb_io import mongodb_output_stream,mongodb_input_stream
+from disco.schemes.scheme_mongodb import input_stream
 from disco.worker.classic.func import task_output_stream
 
 import logging
@@ -14,9 +15,13 @@ def reduce(iter, params):
         yield word, sum(counts)
 
 if __name__ == '__main__':
+
+    #mongodb_input_stream = (input_stream,)
+
     job = Job().run(input=["mongodb://localhost/test.modforty"],
             map=map,
             reduce=reduce,
+            map_input_stream = mongodb_input_stream,
             reduce_output_stream=mongodb_output_stream)
 
     job.wait(show=True)
