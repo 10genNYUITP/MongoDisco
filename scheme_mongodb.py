@@ -1,4 +1,5 @@
 import pymongo
+import bson
 import warnings
 from cStringIO import StringIO
 from pymongo import Connection, uri_parser
@@ -21,7 +22,11 @@ def open(url=None, task=None):
         query = son.SON()
         li_q = json.loads(json_query)
         for tupl in li_q:
-            query[tupl[0]] = tupl[1]
+            if tupl[0] == "$max" or tupl[0] == "$min":
+                obj_id = bson.objectid.ObjectId(tupl[1])
+                query[tupl[0]] = {u'_id' : obj_id}
+            else:
+                query[tupl[0]] = tupl[1]
     if not query:
         query = {}
 
@@ -30,10 +35,11 @@ def open(url=None, task=None):
         connection = Connection(uri)
         database_name = uri_info['database']
         collection_name = uri_info['collection']
+        logging.warning(collection)
         db = connection[database_name]
         collection = db[collection_name]
 
-        cursor =  collection.find(query)
+        cursor =  collection.find(query, None)
 
         wrapper = MongoWrapper(cursor)
         return wrapper
