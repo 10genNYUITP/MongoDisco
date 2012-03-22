@@ -8,6 +8,8 @@ Description: Will calculate splits for a given collection/database
 and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
+from MongoInputSplit import MongoInputSplit
+
 import logging
 import bson
 
@@ -22,6 +24,11 @@ def calculate_splits(config):
     """reads config to find out what type of split to perform"""
     #pass
     uri = config.get("inputURI") if "inputURI" in config else "mongodb://localhost/test.in"
+
+    #HACK -> make config align with this ^^
+    config['inputURI'] = uri
+    #/HACK
+
     #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
 
@@ -39,7 +46,7 @@ def calculate_splits(config):
     useChunks = False #config.isShardChunkedSplittingEnabled()
     slaveOk = True #config.canReadSplitsFromSecondary()
 
-    logging.info(" Calculate Splits Code ... \n:: Use Shards? -> %s \n:: Use Chunks? -> %s \n:: Collection Sharded? -> %s" % (useShards, useChunks, isSharded));
+    logging.info(" Calculate Splits Code ... Use Shards? " , useShards , ", Use Chunks? " , useChunks , "; Collection Sharded? " , isSharded);
 
     if config.get("createInputSplits"):
         logging.info( "Creation of Input Splits is enabled." )
@@ -47,12 +54,12 @@ def calculate_splits(config):
             if useShards and useChunks:
                 logging.warn( "Combining 'use chunks' and 'read from shards directly' can have unexpected & erratic behavior in a live system due to chunk migrations. " );
 
-                logging.info( "Sharding mode calculation entering." );
-                return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri, mongo );
+            logging.info( "Sharding mode calculation entering." );
+            return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri, mongo );
 
-            else: # perfectly ok for sharded setups to run with a normally calculated split. May even be more efficient for some cases
-                logging.info( "Using Unsharded Split mode (Calculating multiple splits though)" );
-                return calculate_unsharded_splits( config, slaveOk, uri, coll );
+        else: # perfectly ok for sharded setups to run with a normally calculated split. May even be more efficient for some cases
+            logging.info( "Using Unsharded Split mode (Calculating multiple splits though)" );
+            return calculate_unsharded_splits( config, slaveOk, uri, collection_name );
 
     else:
         logging.info( "Creation of Input Splits is disabled; Non-Split mode calculation entering." );
@@ -60,7 +67,7 @@ def calculate_splits(config):
 
 
 
-def calculate_unsharded_splits(config, etc):
+def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     """@todo: Docstring for calculate_unsharded_splits
 
     :returns: @todo
@@ -68,12 +75,21 @@ def calculate_unsharded_splits(config, etc):
     """
     splits = [] #will return this list
 
+    # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
+    connection = Connection(uri)
+    db = connection[config["db_name"]]
+    coll = db[config.get('collection_name')]
+
+    q = {} if not "query" in config else config.get("query")
+
+
+
     #create command
     #command to split should look like this VV
     #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', False), ('keyPattern', {'x': 1})])
     split_key  = config.get('splitKey')
     split_size = config.get('splitSize')
-    full_name  = config.get('full_name')
+    full_name  = coll.full_name
     logging.info("Calculating unsharded splits on collection %s with Split Key %s" % (full_name, split_key))
     logging.info("Max split size :: %sMB" % split_size)
 
@@ -84,9 +100,6 @@ def calculate_unsharded_splits(config, etc):
     cmd["keyPattern"]   = split_key
     cmd["force"]        = False
 
-    # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
-    connection = Connection(uri)
-    db = connection[database_name]
     logging.debug("Issuing Command: %s" % cmd)
     data = db.command(cmd)
 
@@ -95,7 +108,8 @@ def calculate_unsharded_splits(config, etc):
 
     if data.get("err"):
         raise Exception(data.get("err"))
-    elif data.get("ok") is not 1.0:
+    elif data.get("ok") != 1.0:
+        print data
         raise Exception("Unable to calculate splits")
 
 
@@ -108,14 +122,14 @@ def calculate_unsharded_splits(config, etc):
         # TODO: what is the query q parameter? (02/26/12, 12:18, AFlock)
         last_key = None
         for bound in split_data:
-            splits.append(_split(conf, q, last_key, bound))
+            splits.append(_split(config, q, last_key, bound))
             last_key = bound
-        splits.append(_split(conf, q, last_key, None))
+        splits.append(_split(config, q, last_key, None))
 
     return splits
 
 
-def _split(config, q, min, max):
+def _split(config=None, q={}, min=None, max=None):
     """@todo: Docstring for _split
     :returns: an actual MongoSplit object
     """
@@ -128,13 +142,20 @@ def _split(config, q, min, max):
     if max:
         query["$max"] = max
 
-    logging.info("Assembled Query: %s" % query)
+    logging.info("Assembled Query: " , query)
 
-    return MongoInputSplit( config.getInputURI(), config.getInputKey(), query, config.getFields(),
-                            config.getSort(), config.getLimit(), config.getSkip(), config.isNoTimeout() )
+    return MongoInputSplit(
+            config.get("inputURI"),
+            config.get("inputKey"),
+            query,
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit"),
+            config.get("skip"),
+            config.get("is_no_timeout")
+            )
 
 def calculate_single_split(config):
-    #pass
     pass
 
 
@@ -161,7 +182,7 @@ def fetch_splits_via_chunks(config):
     """
     pass
 
-"""
+'''
 def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
 
@@ -170,6 +191,7 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     :returns: a new Mongo_URI
     """
 
+#    pass
     orig_URI_string = SCHEME_LEN
     server_end = -1
     server_start = 0
@@ -188,13 +210,13 @@ def get_new_URI(original_URI, new_URI, slave_OK):
 
     sb = orig_URI_string
     sb.replace(orig_URI_string[server_start:server_end], new_URI)
-    if not slave_OK:
+    if slave_OK != null:
         if "?" in orig_URI_string:
             sb.append("&slaveok=").append(slave_OK)
-        else:
+        else
             sb.append("?slaveok=").append(slave_OK)
 
     ans = SCHEME + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans )
     return ans
-"""
+'''

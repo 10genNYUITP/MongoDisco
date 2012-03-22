@@ -7,6 +7,7 @@ Description: Holds the specification for an individual
     split as calculated by MongoSplitter.py
 '''
 import sys, os, logging
+import json
 from pymongo import Connection, uri_parser
 from pymongo.uri_parser import (_partition,
                                 _rpartition,
@@ -47,6 +48,9 @@ class MongoInputSplit():
         connection = Connection(inputURI)
         db = connection[database_name]
         collection = db[collection_name]
+        logging.info("LOOK HERE")
+        logging.info("%s" % query)
+        logging.info("%s" % fields)
         self.cursor = collection.find(query,fields) #.sort(sortSpec) doesn't work?
                                                # @todo support limit/skip --CW
 
@@ -138,8 +142,17 @@ class MongoInputSplit():
         #query is a bson object
         #- need to convert to a list of tuples and jsonify
         o_l = []
-        for k,v in query.iteritems():
-            o_l.append((k,v))
+        #query contains: "$query", "min", "max
+
+        o_l.append(("$query", self.query['$query']))
+        if self.query.get("$min"):
+            oid = str(self.query['$min'])
+            o_l.append(("$min", oid))
+        if self.query.get("$max"):
+            oid = str(self.query['$max'])
+            o_l.append(("$max", oid))
+
+        print o_l
 
         base += json.dumps(o_l)
         return base
