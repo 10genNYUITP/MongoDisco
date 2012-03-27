@@ -69,6 +69,12 @@ class TestSplits(unittest.TestCase):
             coll.insert(i.cursor)
 
 
+class TestSplitIntoInput(unittest.TestCase):
+    #create split
+    #turn splits into special URI
+    #feed URI to input scheme
+    #a list of wrappers will be returned, verify length of them
+
 
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.DEBUG)
