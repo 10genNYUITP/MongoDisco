@@ -8,6 +8,7 @@ Description: Holds the specification for an individual
 '''
 import sys, os, logging
 import json
+from bson import json_util
 from pymongo import Connection, uri_parser
 from pymongo.uri_parser import (_partition,
                                 _rpartition,
@@ -137,15 +138,17 @@ class MongoInputSplit():
         returns a formatted uri like scheme_mongo expects
         we put the query object in a json'd list so we can put it back
         into an ordered SON
+        mongodb://local/test.in?query=<json of query>&limit=234&skip=293
         """
         base = self.inputURI
         #query is a bson object
         #- need to convert to a list of tuples and jsonify
         #o_l = []
-        o_l = []
+        #o_l = []
         #query contains: "$query", "min", "max
 
         #o_l.append(("$query", self.query['$query']))
+        '''
         o_q = self.query['$query']
         #o_l.update({"$query": self.query['$query']})
         if self.query.get("$min"):
@@ -159,8 +162,15 @@ class MongoInputSplit():
 
         o_l.append(("$query", o_q))
         print 'o_l: ', o_l
+        '''
+        #need to rearrange any dict with an ObjectID to look live  VV
+        # '{"_id": {"$oid": "4edebd262ae5e93b41000000"}}'
 
-        base += '?'
-        base += json.dumps(o_l)
+
+
+        base += '?query='
+        base += json.dumps(self.query, default=json_util.default)
+        #TODO add options of
+
         print 'base is before return: ' + base
         return base

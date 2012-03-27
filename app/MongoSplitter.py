@@ -74,6 +74,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     """
     splits = [] #will return this list
+    print "calculating unsharded splits"
 
     # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
     connection = Connection(uri)
@@ -82,7 +83,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     q = {} if not "query" in config else config.get("query")
 
-    print 'in unsharded splits'    
+    print 'in unsharded splits'
     #print 'query in MongoSplitter is ' + q
     #for key in q:
         #print 'am I printing the query?'
@@ -105,7 +106,9 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     cmd["force"]        = False
 
     logging.debug("Issuing Command: %s" % cmd)
+    print "Issuing Command: %s" % cmd
     data = db.command(cmd)
+    print data
 
     #results look like this VV
     #{u'ok': 1.0, u'splitKeys': [{u'_id': ObjectId('4f49775348d9846c5e582b00')}, {u'_id': ObjectId('4f49775548d9846c5e58553b')}]}
@@ -137,6 +140,7 @@ def _split(config=None, q={}, min=None, max=None):
     """@todo: Docstring for _split
     :returns: an actual MongoSplit object
     """
+    print "_split being created"
     query = bson.son.SON()
     query["$query"]  = q
 
