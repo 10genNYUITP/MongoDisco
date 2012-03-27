@@ -82,12 +82,16 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     q = {} if not "query" in config else config.get("query")
 
-
+    print 'in unsharded splits'    
+    #print 'query in MongoSplitter is ' + q
+    #for key in q:
+        #print 'am I printing the query?'
+        #print q[key]
 
     #create command
     #command to split should look like this VV
     #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', False), ('keyPattern', {'x': 1})])
-    split_key  = config.get('splitKey')
+    split_key = config.get('splitKey')
     split_size = config.get('splitSize')
     full_name  = coll.full_name
     logging.info("Calculating unsharded splits on collection %s with Split Key %s" % (full_name, split_key))
