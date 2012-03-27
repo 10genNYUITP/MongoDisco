@@ -5,12 +5,14 @@ from cStringIO import StringIO
 from pymongo import Connection, uri_parser
 import bson.son as son
 import json
+import logging
 
 def open(url=None, task=None):
     #parses a mongodb uri and returns the database
     #"mongodb://localhost/test.in?query='{"key": value}'"
     uri = url if url else "mongodb://localhost/test.in"
 
+    #print 'uri: ' + uri
     uri_info = uri_parser.parse_uri(uri)
     params = uri.split('?', 1)
     query = None
@@ -35,9 +37,9 @@ def open(url=None, task=None):
         connection = Connection(uri)
         database_name = uri_info['database']
         collection_name = uri_info['collection']
-        logging.warning(collection)
         db = connection[database_name]
         collection = db[collection_name]
+        logging.warning(collection)
 
         cursor =  collection.find(query, None)
 

@@ -141,18 +141,26 @@ class MongoInputSplit():
         base = self.inputURI
         #query is a bson object
         #- need to convert to a list of tuples and jsonify
+        #o_l = []
         o_l = []
         #query contains: "$query", "min", "max
 
-        o_l.append(("$query", self.query['$query']))
+        #o_l.append(("$query", self.query['$query']))
+        o_q = self.query['$query']
+        #o_l.update({"$query": self.query['$query']})
         if self.query.get("$min"):
             oid = str(self.query['$min'])
-            o_l.append(("$min", oid))
+            o_q.update({'$min': oid})
+            #o_l.append(("$min", oid))
         if self.query.get("$max"):
             oid = str(self.query['$max'])
-            o_l.append(("$max", oid))
+            o_q.update({'$max': oid})
+            #o_l.append(("$max", oid))
 
-        print o_l
+        o_l.append(("$query", o_q))
+        print 'o_l: ', o_l
 
+        base += '?'
         base += json.dumps(o_l)
+        print 'base is before return: ' + base
         return base

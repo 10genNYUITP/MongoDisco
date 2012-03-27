@@ -8,9 +8,9 @@ import logging
 
 config = {
         "db_name": "test",
-        "collection_name": "in",
+        "collection_name": "modforty",
         "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.in",
+        "inputURI": "mongodb://localhost/test.modforty",
         "createInputSplits": True,
         "splitKey": {'_id' : 1},
         }
@@ -26,19 +26,26 @@ def reduce(iter, params):
 
 if __name__ == '__main__':
 
-    logging.getLogger().setLevel(logging.DEBUG)
+#    logging.getLogger().setLevel(logging.DEBUG)
     #mongodb_input_stream = (input_stream,)
-    #input_s_splits =  do_split(config)
+    input_s_splits =  do_split(config)
     #print input_s_splits
+    
+    for i in input_s_splits:
+        i.format_uri_with_query()
+    #split = input_s_splits[0]
+    
+    #back_dump = split.format_uri_with_query()
     #input_urls = [split.format_uri_with_query() for split in input_s_splits]
+	#use scheme to 
 
-    job = Job().run(
-            input=["mongodb://localhost/test.modforty"],
-            input= input_urls,
-            map=map,
-            reduce=reduce,
-            map_input_stream = mongodb_input_stream,
-            reduce_output_stream=mongodb_output_stream)
+ #   job = Job().run(
+  #          input=["mongodb://localhost/test.modforty"],
+            #input= input_urls,
+   #         map=map,
+    #        reduce=reduce,
+     #       map_input_stream = mongodb_input_stream,
+      #      reduce_output_stream=mongodb_output_stream)
 
-    job.wait(show=True)
+    #job.wait(show=True)
 
