@@ -28,13 +28,29 @@ def open(url=None, task=None):
     options = {}
     if len(params) > 1:
         params = params[1]
+        #another easy way to parse parameters
+        #from urlparse import parse_qs
+        #return a dict {'key',['value']}
+        #e.g {'limit':['100'],'skip':['99']}
+        #dict_of_params = parse_qs(params)
+
         list_of_params = params.split('&', 1)
         for p in params:
-            name, json_obj = params.split('=')
+            name, json_obj = params.split('=') #shouldn't be p.split('=')?
             if name == 'query':
                 query = son.SON(json.loads(json_obj, object_hook=json_util.object_hook))
+            elif name == 'fields':
+                pass
+            elif name == 'limit' or name == 'skip':
+                pass
+            elif name == 'timeout' or name == 'slave_okay':
+                pass
+            elif name == 'sort':
+                pass
             else:
                 options[name] = json_obj
+                #@to-do get other parameters from url
+                #do type convertion as needed
 
         '''
         query = son.SON()
@@ -49,6 +65,16 @@ def open(url=None, task=None):
     if not query:
         query = {}
 
+    spec = query
+    fields = options['fields'] if 'fields' in options else None #list or dict
+    skip = options['skip'] if 'skip' in options else 0 #int
+    limit = options['limit'] if 'limit' in options else 0 #int
+    timeout = options['timeout'] if 'timeout' in options else True #bool
+    sort = options['sort'] if 'sort' in options else None #list of (key,direction) pair
+    slave_okay = options['slave_oky'] if 'slave_okay' in options else False #bool
+    read_preference = options['read_preference'] in 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
+
+
     #go around: connect to the sonnection then choose db by ['dbname']
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -58,7 +84,8 @@ def open(url=None, task=None):
         db = connection[database_name]
         collection = db[collection_name]
 
-        cursor =  collection.find(query, None)
+        #cursor =  collection.find(query, None)
+        curson = collection.find(spec = spec, fileds = fields, skip = skip, limit = limit, sort = sort, slave_okay = slave_okay, read_preference = read_preference)
 
         wrapper = MongoWrapper(cursor)
         return wrapper
