@@ -72,7 +72,7 @@ def open(url=None, task=None):
     timeout = options['timeout'] if 'timeout' in options else True #bool
     sort = options['sort'] if 'sort' in options else None #list of (key,direction) pair
     slave_okay = options['slave_oky'] if 'slave_okay' in options else False #bool
-    read_preference = options['read_preference'] in 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
+    read_preference = options['read_preference'] if 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
 
 
     #go around: connect to the sonnection then choose db by ['dbname']
