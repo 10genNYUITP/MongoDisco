@@ -75,23 +75,19 @@ class MongoWrapper(object):
 
     def __iter__(self):
         #most important method
-        for rec in self.cursor:
-            yield rec
+        return self.cursor
 
     def __len__(self):
         #may need to do this more dynamically (see lib/disco/comm.py ln 163)
+        #may want to cache this
         return self.cursor.count()
 
     def close(self):
         self.cursor.close()
 
-    @property
     def read(self, size=-1):
-        list_of_records = []
-        if size > 0:
-            for i in range(size):
-                list_of_records.append(self.cursor.__iter__())
-        return list_of_records
+        #raise a non-implemented error to see if this ever pops up
+        raise Exception("read is not implemented- investigate why this was called")
 
 
 def input_stream(stream, size, url, params):
