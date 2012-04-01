@@ -3,7 +3,7 @@ import bson
 from bson import json_util
 import warnings
 from cStringIO import StringIO
-from pymongo import Connection, uri_parser
+from pymongo import Connection, uri_parser, ReadPreference
 import bson.son as son
 import json
 import logging
@@ -72,7 +72,7 @@ def open(url=None, task=None):
     timeout = options['timeout'] if 'timeout' in options else True #bool
     sort = options['sort'] if 'sort' in options else None #list of (key,direction) pair
     slave_okay = options['slave_oky'] if 'slave_okay' in options else False #bool
-    read_preference = options['read_preference'] in 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
+    read_preference = options['read_preference'] if 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
 
 
     #go around: connect to the sonnection then choose db by ['dbname']
@@ -85,7 +85,7 @@ def open(url=None, task=None):
         collection = db[collection_name]
 
         #cursor =  collection.find(query, None)
-        curson = collection.find(spec = spec, fileds = fields, skip = skip, limit = limit, sort = sort, slave_okay = slave_okay, read_preference = read_preference)
+        cursor = collection.find(spec = spec, fileds = fields, skip = skip, limit = limit, sort = sort, slave_okay = slave_okay, read_preference = read_preference)
 
         wrapper = MongoWrapper(cursor)
         return wrapper
