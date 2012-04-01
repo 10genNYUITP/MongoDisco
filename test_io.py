@@ -9,9 +9,9 @@ import logging
 
 config = {
         "db_name": "test",
-        "collection_name": "in",
+        "collection_name": "modforty",
         "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.in",
+        "inputURI": "mongodb://localhost/test.modforty",
         "createInputSplits": True,
         "splitKey": {'_id' : 1},
         }
