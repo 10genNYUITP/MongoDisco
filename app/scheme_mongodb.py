@@ -35,8 +35,8 @@ def open(url=None, task=None):
         #dict_of_params = parse_qs(params)
 
         list_of_params = params.split('&', 1)
-        for p in params:
-            name, json_obj = params.split('=') #shouldn't be p.split('=')?
+        for p in list_of_params:
+            name, json_obj = p.split('=') #shouldn't be p.split('=')?
             if name == 'query':
                 query = son.SON(json.loads(json_obj, object_hook=json_util.object_hook))
             elif name == 'fields':
