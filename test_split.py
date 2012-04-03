@@ -31,12 +31,12 @@ class TestSplits(unittest.TestCase):
         db = conn[config.get('db_name')]
         coll = db[config.get('collection_name')]
         #print db.command("collstats", coll.full_name)
-        
+
         #NOTE: need to run this code once to populate the database, after that comment it out
         #for i in range(40000):
           #  post = {"name" : i, "date": datetime.datetime.utcnow()}
            # coll.insert(post)
-        
+
 
 
         #print coll.count()
@@ -74,6 +74,7 @@ class TestSplitIntoInput(unittest.TestCase):
     #turn splits into special URI
     #feed URI to input scheme
     #a list of wrappers will be returned, verify length of them
+    pass
 
 
 if __name__ == '__main__':
