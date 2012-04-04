@@ -8,7 +8,7 @@ Description: Holds the specification for an individual
 '''
 import sys, os, logging
 import json
-from bson import json_util
+from bson import json_util,son
 from pymongo import Connection, uri_parser
 from pymongo.uri_parser import (_partition,
                                 _rpartition,
@@ -24,7 +24,7 @@ class MongoInputSplit():
     and is able to pass that split's data to disco
     """
 
-    def __init__(self, inputURI, keyField, query, fields, sort, limit, skip, noTimeout):
+    def __init__(self, inputURI, keyField, query, fields=None, sort=None, limit=0, skip=0, timeout=True):
         self.inputURI = inputURI
         self.keyField = keyField
         self.query = query
@@ -32,7 +32,7 @@ class MongoInputSplit():
         self.sort = sort
         self.limit = limit
         self.skip = skip
-        self.noTimeout = noTimeout
+        self.timeout = timeout
 
 
         #self.cursor = self.get_cursor()
@@ -55,10 +55,11 @@ class MongoInputSplit():
         self.cursor = collection.find(query,fields) #.sort(sortSpec) doesn't work?
                                                # @todo support limit/skip --CW
 
+        '''
         if self.noTimeout:
             # TODO should be something else? blank for now
             self.cursor.add_option()
-
+        '''
 
 
     def write(self, out):
@@ -162,7 +163,6 @@ class MongoInputSplit():
 
         o_l.append(("$query", o_q))
         print 'o_l: ', o_l
-        '''
         #need to rearrange any dict with an ObjectID to look live  VV
         # '{"_id": {"$oid": "4edebd262ae5e93b41000000"}}'
 
@@ -172,5 +172,18 @@ class MongoInputSplit():
         base += json.dumps(self.query, default=json_util.default)
         #TODO add options of
 
-        print 'base is before return: ' + base
-        return base
+        '''
+        queryObj = son.SON()
+        queryObj['inputURI'] = self.inputURI
+        queryObj['keyField'] = self.keyField
+        queryObj['query'] = self.query
+        queryObj['fields'] = self.fields
+        queryObj['sort'] = self.sort
+        queryObj['limit'] = self.limit
+        queryObj['skip'] = self.skip
+        queryObj['timeout'] = self.timeout
+
+        print 
+        str = json.dumps(queryObj,default=json_util.default) 
+        print str
+        return str

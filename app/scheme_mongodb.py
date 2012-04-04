@@ -9,6 +9,8 @@ import json
 import logging
 
 def open(url=None, task=None):
+
+    '''
     #parses a mongodb uri and returns the database
     #"mongodb://localhost/test.in?query='{"key": value}'"
     uri = url if url else "mongodb://localhost/test.in"
@@ -52,7 +54,6 @@ def open(url=None, task=None):
                 #@to-do get other parameters from url
                 #do type convertion as needed
 
-        '''
         query = son.SON()
         li_q = json.loads(json_query)
         for tupl in li_q:
@@ -61,35 +62,29 @@ def open(url=None, task=None):
                 query[tupl[0]] = {u'_id' : obj_id}
             else:
                 query[tupl[0]] = tupl[1]
-        '''
     if not query:
         query = {}
-
-    spec = query
-    fields = options['fields'] if 'fields' in options else None #list or dict
-    skip = options['skip'] if 'skip' in options else 0 #int
-    limit = options['limit'] if 'limit' in options else 0 #int
-    timeout = options['timeout'] if 'timeout' in options else True #bool
-    sort = options['sort'] if 'sort' in options else None #list of (key,direction) pair
-    slave_okay = options['slave_oky'] if 'slave_okay' in options else False #bool
-    read_preference = options['read_preference'] if 'read_preference' in options else ReadPreference.PRIMARY #pymongo.ReadPreference
+        '''
+    
+    query = son.SON(json.loads(url, object_hook=json_util.object_hook))
+    uri = query['inputURI']
+    uri_info = uri_parser.parse_uri(uri)
+    spec = query['query']
+    fields = query['fields'] 
+    skip = query['skip'] 
+    limit = query['limit'] 
+    timeout = query['timeout'] 
+    sort = query['sort'] 
 
 
     #go around: connect to the sonnection then choose db by ['dbname']
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        connection = Connection(uri)
-        database_name = uri_info['database']
-        collection_name = uri_info['collection']
-        db = connection[database_name]
-        collection = db[collection_name]
 
-        #cursor =  collection.find(query, None)
-        cursor = collection.find(spec = spec, fileds = fields, skip = skip, limit = limit, sort = sort, slave_okay = slave_okay, read_preference = read_preference)
+    collection = getCollection(uri)
+    cursor = collection.find(spec = spec, fields = fields, skip = skip, limit = limit, sort = sort, timeout = timeout)
 
-        wrapper = MongoWrapper(cursor)
-        return wrapper
-        #WRAPPED!
+    wrapper = MongoWrapper(cursor)
+    return wrapper
+    #WRAPPED!
 
 
 class MongoWrapper(object):
@@ -120,3 +115,39 @@ class MongoWrapper(object):
 def input_stream(stream, size, url, params):
     mon = open(url)
     return mon
+
+def getConnection(uri):
+    uri_info = uri_parser.parse_uri(uri)
+    nodes = set()
+    host = None
+    port = None
+    nodes.update(uri_info["nodelist"])
+
+    if len(nodes) == 1: #How to handle multiple nodes?
+        for node in nodes:
+            host = node[0]
+            port = node[1]
+
+    connection = Connection(host=host,port=port)
+    
+    return connection
+    
+
+def getCollection(uri):
+
+    uri_info = uri_parser.parse_uri(uri)
+    username = None
+    password = None
+    db = None
+    username = uri_info["username"] or username
+    password = uri_info["password"] or password
+    db = uri_info["database"]
+    col = uri_info["collection"]
+
+    connection = getConnection(uri)
+    
+    if username:
+        if not connection[db].authenticate(username,password):
+            raise ConfigurationError("authentication failed")
+
+    return connection[db][col]

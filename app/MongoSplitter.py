@@ -103,7 +103,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     cmd["splitVector"]  = full_name
     cmd["maxChunkSize"] = split_size
     cmd["keyPattern"]   = split_key
-    cmd["force"]        = False
+    cmd["force"]        = True
 
     logging.debug("Issuing Command: %s" % cmd)
     print "Issuing Command: %s" % cmd
@@ -158,10 +158,9 @@ def _split(config=None, q={}, min=None, max=None):
             query,
             config.get("fields"),
             config.get("sort"),
-            config.get("limit"),
-            config.get("skip"),
-            config.get("is_no_timeout")
-            )
+            config.get("limit", 0),
+            config.get("skip", 0),
+            config.get("timeout", True))
 
 def calculate_single_split(config):
     pass
