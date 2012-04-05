@@ -9,6 +9,7 @@ Description: Holds the specification for an individual
 import sys, os, logging
 import json
 from bson import json_util,son
+from mongoUtil import getConnection
 from pymongo import Connection, uri_parser
 from pymongo.uri_parser import (_partition,
                                 _rpartition,
@@ -46,7 +47,7 @@ class MongoInputSplit():
         database_name = uri_info['database']
         collection_name = uri_info['collection']
 
-        connection = Connection(inputURI)
+        connection = getConnection(inputURI)
         db = connection[database_name]
         collection = db[collection_name]
         logging.info("LOOK HERE")
@@ -95,7 +96,7 @@ class MongoInputSplit():
         database_name = uri_info['database']
         collection_name = uri_info['collection']
 
-        connection = Connection(uri)
+        connection = getConnection(uri)
         db = connection[database_name]
         collection = db[collection_name]
         self.cursor = collection.find(query,fields) #.sort(sortSpec) doesn't work?
@@ -183,7 +184,7 @@ class MongoInputSplit():
         queryObj['skip'] = self.skip
         queryObj['timeout'] = self.timeout
 
-        print 
-        str = json.dumps(queryObj,default=json_util.default) 
+        print
+        str = json.dumps(queryObj,default=json_util.default)
         print str
         return str
