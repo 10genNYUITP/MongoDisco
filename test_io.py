@@ -11,7 +11,7 @@ config = {
         "db_name": "test",
         "collection_name": "modforty",
         "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.modforty",
+        "inputURI": "mongodb://localhost/test.in",
         "createInputSplits": True,
         "splitKey": {'_id' : 1},
         }
@@ -27,21 +27,11 @@ def reduce(iter, params):
 
 if __name__ == '__main__':
 
-#    logging.getLogger().setLevel(logging.DEBUG)
-    #mongodb_input_stream = (input_stream,)
-    input_s_splits =  do_split(config)
-    print input_s_splits
 
-    #split = input_s_splits[0]
-
-    #back_dump = split.format_uri_with_query()
-    input_urls = [split.format_uri_with_query() for split in input_s_splits]
-    print input_urls
-	#use scheme to
-
+    logging.getLogger().setLevel(logging.DEBUG)
     job = Job().run(
-  #          input=["mongodb://localhost/test.modforty"],
-            input= input_urls,
+            #input=["mongodb://localhost/test.modforty"],
+            input= do_split(config),
             map=map,
             reduce=reduce,
             map_input_stream = mongodb_input_stream,
