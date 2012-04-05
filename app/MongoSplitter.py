@@ -9,6 +9,7 @@ and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
 from MongoInputSplit import MongoInputSplit
+from mongoUtil import getCollection, getConnection
 
 import logging
 import bson
@@ -37,7 +38,7 @@ def calculate_splits(config):
     database_name = uri_info['database']
     collection_name = uri_info['collection']
 
-    connection = Connection(uri)
+    connection = getConnection(uri)
     db = connection[database_name]
     stats = db.command("collstats", collection_name)
 
@@ -46,24 +47,24 @@ def calculate_splits(config):
     useChunks = False #config.isShardChunkedSplittingEnabled()
     slaveOk = True #config.canReadSplitsFromSecondary()
 
-    logging.info(" Calculate Splits Code ... Use Shards? " , useShards , ", Use Chunks? " , useChunks , "; Collection Sharded? " , isSharded);
+    logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
 
     if config.get("createInputSplits"):
         logging.info( "Creation of Input Splits is enabled." )
         if isSharded and (useShards or useChunks):
             if useShards and useChunks:
-                logging.warn( "Combining 'use chunks' and 'read from shards directly' can have unexpected & erratic behavior in a live system due to chunk migrations. " );
+                logging.warn( "Combining 'use chunks' and 'read from shards directly' can have unexpected & erratic behavior in a live system due to chunk migrations. " )
 
-            logging.info( "Sharding mode calculation entering." );
-            return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri, mongo );
+            logging.info( "Sharding mode calculation entering." )
+            return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri, mongo )
 
         else: # perfectly ok for sharded setups to run with a normally calculated split. May even be more efficient for some cases
-            logging.info( "Using Unsharded Split mode (Calculating multiple splits though)" );
-            return calculate_unsharded_splits( config, slaveOk, uri, collection_name );
+            logging.info( "Using Unsharded Split mode (Calculating multiple splits though)" )
+            return calculate_unsharded_splits( config, slaveOk, uri, collection_name )
 
     else:
         logging.info( "Creation of Input Splits is disabled; Non-Split mode calculation entering." );
-        return calculate_single_split( config );
+        return calculate_single_split( config )
 
 
 
@@ -77,7 +78,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     print "calculating unsharded splits"
 
     # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
-    connection = Connection(uri)
+    connection = getConnection(uri)
     db = connection[config["db_name"]]
     coll = db[config.get('collection_name')]
 
