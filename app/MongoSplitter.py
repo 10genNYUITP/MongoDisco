@@ -133,7 +133,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
             last_key = bound
         splits.append(_split(config, q, last_key, None))
 
-    return splits
+    return [s.format_uri_with_query() for s in splits]
 
 
 def _split(config=None, q={}, min=None, max=None):
