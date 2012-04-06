@@ -40,4 +40,5 @@ default_config = {
         "fields" : "",
         "query" : "",
         "collection_name" : "in",
+        "db_name" : "test",
         }
