@@ -8,6 +8,7 @@ Description: Will calculate splits for a given collection/database
 and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
+from sets, import Set
 from MongoInputSplit import MongoInputSplit
 from mongoUtil import getCollection, getConnection
 
@@ -212,7 +213,39 @@ def fetch_splits_from_shards(config, uri, slaveOk):
     :returns: @todo
     """
     logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results")
-    pass
+    connection = getConnection(uri)
+    
+    configDB = connection["config"]
+    shardsColl = db[config.get("shards")]
+
+    shardSet = set()
+    cur = shardsColl.find()
+    
+    try:
+        for row in cur:
+            host = row["host"]
+            slashIndex = host.find("/")
+            if slashIndex > 0:
+                host = host[slashIndex+1:]
+            shardSet.append(host)
+    finally:
+        if cur != None:
+            cur.close()
+        cur = None
+
+    splits = []
+    for host in shardSet:
+        splits.append(MongoInputSplit(
+            config.get("inputURI"),
+            config.get("inputKey"),
+            config.get("query"),
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit", 0),
+            config.get("skip", 0),
+            config.get("timeout", True))
+    
+    return splits
 
 def fetch_splits_via_chunks(config):
     """@todo: Docstring for fetch_splits_via_chunks
