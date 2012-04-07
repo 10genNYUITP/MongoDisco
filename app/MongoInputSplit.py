@@ -110,27 +110,7 @@ class MongoInputSplit():
 
 
 
-    def get_BSON_encoder(self):
-        """@todo: Docstring for get_BSON_encoder
-
-        :returns: a BSON Encoder object
-        """
-        pass
-
-    def get_BSON_decoder(self):
-        """@todo: Docstring for get_BSON_decoder
-
-        :returns: a BSON Decoder
-        """
-        pass
-
     # NOT INCLUDING: getters/setters  for all the data members (this is Python, not Java ^_^)
-
-    def hashCode(self):
-        """@todo: Docstring for hashCode
-        :returns: @todo
-        """
-        pass
 
     def __str__(self):
         return self.cursor

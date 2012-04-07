@@ -164,24 +164,55 @@ def _split(config=None, q={}, min=None, max=None):
             config.get("timeout", True))
 
 def calculate_single_split(config):
-    pass
+    splits = [None] * 1 #will return this list's URI
+    print "calculating single split"
+    
+    splits.append(MongoInputSplit(
+            config.get("inputURI"),
+            config.get("inputKey"),
+            query,
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit", 0),
+            config.get("skip", 0),
+            config.get("timeout", True))
+    
+    logging.info("Calculated %s split objects.", len(splits) )
+    logging.debug("Dump of calculated splits ... ")
+    for s in splits:
+        logging.debug("    Split: ", split)
+
+    return [s.format_uri_with_query() for s in splits]
 
 
-def calculate_sharded_splits(config, etc):
+def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
     """Worry about this after unsharded splits are doen
 
     :returns: @todo
     """
-    pass
+    splits = []
+    if useChunks:
+        splits = fetch_splits_via_chunks(config, uri, useShards, slaveOk)
+    else if useShards:
+        logging.warn("Fetching Input Splits directly from shards is potentially dangerous for data consistency should migrations occur during the retrieval.")
+        splits = fetch_splits_from_shards(config, uri, slaveOk)
+    else:
+        logging.error("Neither useChunks nor useShards enabled; failed to pick a valid state.")
+    
+    if splits == None:
+        logging.error("Failed to create/calculate Input Splits from Shard Chunks; final splits content is 'None'." )
 
-def fetch_splits_from_shards(config):
+    logging.debug("Calculated splits and returning them - splits: ", splits)
+    return [s.format_uri_with_query() for s in splits]
+
+
+def fetch_splits_from_shards(config, uri, slaveOk):
     """@todo: Docstring for fetch_splits_from_shards
 
     :returns: @todo
     """
+    logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results")
     pass
-
-
 
 def fetch_splits_via_chunks(config):
     """@todo: Docstring for fetch_splits_via_chunks
