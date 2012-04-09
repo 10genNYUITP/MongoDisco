@@ -8,9 +8,9 @@ Description: Will calculate splits for a given collection/database
 and store/return them in MongoSplit objects
 '''
 from pymongo import Connection, uri_parser
-from sets, import Set
+from sets import Set
 from MongoInputSplit import MongoInputSplit
-from mongoUtil import getCollection, getConnection
+from mongoUtil import getCollection, getConnection,getDatabase
 
 import logging
 import bson
@@ -34,13 +34,15 @@ def calculate_splits(config):
     #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
 
-    host = uri_info['nodelist'][0][0]
-    port = uri_info['nodelist'][0][1]
     database_name = uri_info['database']
     collection_name = uri_info['collection']
 
+    '''
     connection = getConnection(uri)
     db = connection[database_name]
+    '''
+
+    db = getDatabase(uri)
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
@@ -74,14 +76,19 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     :returns: @todo
 
+    Note: collection_name seems unnecessary --CW
+
     """
     splits = [] #will return this list
     print "calculating unsharded splits"
 
     # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
+    '''
     connection = getConnection(uri)
-    db = connection[config["db_name"]]
+    db = getDatabase(uri)
     coll = db[config.get('collection_name')]
+    '''
+    coll = getCollection(uri)
 
     q = {} if not "query" in config else config.get("query")
 
@@ -109,7 +116,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     logging.debug("Issuing Command: %s" % cmd)
     print "Issuing Command: %s" % cmd
-    data = db.command(cmd)
+    data = coll.database.command(cmd)
     print data
 
     #results look like this VV
@@ -165,7 +172,8 @@ def _split(config=None, q={}, min=None, max=None):
             config.get("timeout", True))
 
 def calculate_single_split(config):
-    splits = [None] * 1 #will return this list's URI
+    #splits = [None] * 1 #will return this list's URI
+    splits = []
     print "calculating single split"
     
     splits.append(MongoInputSplit(
@@ -177,12 +185,12 @@ def calculate_single_split(config):
             config.get("limit", 0),
             config.get("skip", 0),
             config.get("timeout", True))
+
     
-    logging.info("Calculated %s split objects."% len(splits) )
+    logging.info("Calculated %d split objects." % len(splits) )
     logging.debug("Dump of calculated splits ... ")
     for s in splits:
         logging.debug("    Split: ", split)
-
     return [s.format_uri_with_query() for s in splits]
 
 
