@@ -184,14 +184,15 @@ def calculate_single_split(config):
             config.get("sort"),
             config.get("limit", 0),
             config.get("skip", 0),
-            config.get("timeout", True))
+            config.get("timeout", True)))
 
     
-    logging.info("Calculated %d split objects." % len(splits) )
+    logging.debug("Calculated %d split objects"% len(splits) )
     logging.debug("Dump of calculated splits ... ")
     for s in splits:
-        logging.debug("    Split: ", split)
+        logging.debug("    Split: %s"% split)
     return [s.format_uri_with_query() for s in splits]
+#pass
 
 
 def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
@@ -202,7 +203,7 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
     splits = []
     if useChunks:
         splits = fetch_splits_via_chunks(config, uri, useShards, slaveOk)
-    else if useShards:
+    elif useShards:
         logging.warn("Fetching Input Splits directly from shards is potentially dangerous for data consistency should migrations occur during the retrieval.")
         splits = fetch_splits_from_shards(config, uri, slaveOk)
     else:
@@ -212,7 +213,7 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
         logging.error("Failed to create/calculate Input Splits from Shard Chunks; final splits content is 'None'." )
 
     logging.debug("Calculated splits and returning them - splits: ", splits)
-    return [s.format_uri_with_query() for s in splits]
+    return splits
 
 
 def fetch_splits_from_shards(config, uri, slaveOk):
@@ -243,17 +244,17 @@ def fetch_splits_from_shards(config, uri, slaveOk):
 
     splits = []
     for host in shardSet:
-        splits.append(MongoInputSplit(
-            config.get("inputURI"),
-            config.get("inputKey"),
-            config.get("query"),
-            config.get("fields"),
-            config.get("sort"),
-            config.get("limit", 0),
-            config.get("skip", 0),
-            config.get("timeout", True))
+        splits.append(MongoInputSplit(config.get("inputURI"), 
+                config.get("inputKey"), 
+                config.get("query"), 
+                config.get("fields"), 
+                config.get("sort"), 
+                config.get("limit", 0), 
+                config.get("skip", 0), 
+                config.get("timeout", True)))
     
-    return splits
+    return [s.format_uri_with_query() for s in splits]
+
 
 def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     """@todo: Docstring for fetch_splits_via_chunks
@@ -303,7 +304,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         splits = []
         
         for row in cur:
-            numChunks++
+            numChunks += 1
             minObj = row.get('min')
             shardKeyQuery = bson.son.SON()
             min = bson.son.SON()
@@ -340,11 +341,11 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
                 config.get("sort"),
                 config.get("limit", 0),
                 config.get("skip", 0),
-                config.get("timeout", True))
+                config.get("timeout", True)))
 			
-        logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were ", numChunks, " chunks, returning ", len(splits), " splits: ", splits)
+        logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were %d chunks, returning %d splits: %s"%(numChunks, len(splits), splits))
 
-        return splits
+        return [s.format_uri_with_query() for s in splits]
 
     finally:
         if cur != None:
