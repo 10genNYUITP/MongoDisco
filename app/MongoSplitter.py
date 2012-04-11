@@ -274,7 +274,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     shardMap = {}
 
     if useShards:
-        shardsColl = db[config.get("shards")]
+        shardsColl = configDB["shards"]
         cur = shardsColl.find()
 
         try:
@@ -290,10 +290,13 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         
     logging.debug( "MongoInputFormat.getSplitsUsingChunks(): shard map is: %s"% shardMap )
 
-    chunksCollection = db[config.get("chunks")]
+    chunksCollection = configDB["chunks"]
     query = bson.son.SON()
-    db = connection[config['db_name']]
-    query["$ns"] = db + "." + db[config['collection_name']]
+    #db = connection[config['db_name']]
+    #query["$ns"] = db + "." + db[config['collection_name']]
+
+    uri_info = uri_parser.parse_uri(uri)
+    query["$ns"] = uri_info['database']+'.'+uri_info['collection']
 
     cur = chunksCollection.find(query)
 
@@ -314,7 +317,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
                 tMin = minObj[key]
                 tMax = (row.get('max'))[key]
     #if (The splitFriendyDBCallBack calls here!!!!)
-	#
+	#Ask 10gen guys.
 	#
 	#
             if originalQuery == None:
@@ -331,10 +334,10 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             if useShards:
                 shardName = row.get('shard')
                 host = shardMap[shardName]
-               #inputURI = new URI??
+                inputURI = getNewURI(inputURI,host,slaveOk)
 	
             splits.append(MongoInputSplit(
-                config.get("inputURI"),
+                inputURI,
                 config.get("inputKey"),
                 config.get("query"),
                 config.get("fields"),
@@ -352,7 +355,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             cur.close()
             
 
-'''
+
 def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
 
@@ -362,12 +365,15 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     """
 
 #    pass
-    orig_URI_string = SCHEME_LEN
+    #orig_URI_string = SCHEME_LEN
+    MongoURI_PREFIX = "mongodb://"
+    orig_URI_string = original_URI[len(MongoURI_PREFIX):]
+
     server_end = -1
     server_start = 0
 
     """to find the last index of / in the original URI string """
-    idx = orig_URI_string[::-1].find("/")
+    idx = orig_URI_string.rfind("/")
     if idx < 0:
         server_end = len(orig_URI_string)
     else:
@@ -375,18 +381,17 @@ def get_new_URI(original_URI, new_URI, slave_OK):
 
     idx = orig_URI_string.find("@")
 
-    if idx > 0:
-        server_start = idx + 1
+    server_start = idx + 1
 
-    sb = orig_URI_string
-    sb.replace(orig_URI_string[server_start:server_end], new_URI)
-    if slave_OK != null:
+    sb = orig_URI_string[0:server_start]+ new_URI + orig_URI_string[server_end:]
+    
+    #sb.replace(orig_URI_string[server_start:server_end], new_URI)
+    if slave_OK is not None:
         if "?" in orig_URI_string:
-            sb.append("&slaveok=").append(slave_OK)
-        else
-            sb.append("?slaveok=").append(slave_OK)
+            sb = sb + "&slaveok=" + str(slave_OK)
+        else:
+            sb = sb + "?slaveok=" + str(slave_OK)
 
-    ans = SCHEME + sb
+    ans = MongoURI_PREFIX + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans )
     return ans
-'''
