@@ -9,6 +9,8 @@ Description: Configuration helper tool for MongoDB related Map/Reduce jobs Insta
 import logging
 import bson
 
+config = default_config
+
 default_config = {
         "jobVerbose" : False,
         "jobBackground" : False,
@@ -42,3 +44,10 @@ default_config = {
         "collection_name" : "in",
         "db_name" : "test",
         }
+
+# create a method to accept the client's default config dictionary. This method should return values from the client specified config, if exists, or from the default_config file
+
+def readConfigFile(clientConfigDict):
+    global config
+    config = clientConfigDict
+    
