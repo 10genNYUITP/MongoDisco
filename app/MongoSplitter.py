@@ -291,18 +291,22 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     logging.debug( "MongoInputFormat.getSplitsUsingChunks(): shard map is: %s"% shardMap )
 
     chunksCollection = configDB["chunks"]
+    print configDB.collection_names()
     query = bson.son.SON()
     #db = connection[config['db_name']]
     #query["$ns"] = db + "." + db[config['collection_name']]
 
     uri_info = uri_parser.parse_uri(uri)
-    query["$ns"] = uri_info['database']+'.'+uri_info['collection']
+    query["ns"] = uri_info['database']+'.'+uri_info['collection']
 
     cur = chunksCollection.find(query)
+    print query
+    print cur.count()
+    print chunksCollection.find().count()
 
     try:
         numChunks = 0
-        numExpectedChunks = len(cur)
+        numExpectedChunks = cur.count
 
         splits = []
         
@@ -315,8 +319,11 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
             for key in minObj:
                 tMin = minObj[key]
+                print tMin, type(tMin)
                 tMax = (row.get('max'))[key]
 
+
+            #@to-do do type comparison first
                 if tMin!= "MinKey":
                     min[key] = tMin
                 if tMax != "MaxKey":
@@ -327,33 +334,33 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 	#
 	#
              
-        if originalQuery == None:
-            originalQuery = bson.son.SON()
-        
-        shardKeyQuery["$min"] = min
-        shardKeyQuery["$max"] = max
-        shardKeyQuery["$query"] = originalQuery
+            if originalQuery == None:
+                originalQuery = bson.son.SON()
+            
+            shardKeyQuery["$min"] = min
+            shardKeyQuery["$max"] = max
+            shardKeyQuery["$query"] = originalQuery
 
-        logging.debug("["+numChunks+"/"+numExpectedChunks+"] new query is: "+shardKeyQuery)
+            #logging.debug("["+numChunks+"/"+numExpectedChunks+"] new query is: "+shardKeyQuery)
 
-        inputURI = config.get("inputURI")
+            inputURI = config.get("inputURI")
 
-        if useShards:
-            shardName = row.get('shard')
-            host = shardMap[shardName]
-            inputURI = getNewURI(inputURI,host,slaveOk)
+            if useShards:
+                shardName = row.get('shard')
+                host = shardMap[shardName]
+                inputURI = get_new_URI(inputURI,host,slaveOk)
 
-        splits.append(MongoInputSplit(
-            inputURI,
-            config.get("inputKey"),
-            config.get("query"),
-            config.get("fields"),
-            config.get("sort"),
-            config.get("limit", 0),
-            config.get("skip", 0),
-            config.get("timeout", True)))
-        
-        logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were %d chunks, returning %d splits: %s"%(numChunks, len(splits), splits))
+            splits.append(MongoInputSplit(
+                inputURI,
+                config.get("inputKey"),
+                shardKeyQuery,
+                config.get("fields"),
+                config.get("sort"),
+                config.get("limit", 0),
+                config.get("skip", 0),
+                config.get("timeout", True)))
+            
+            #logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were %d chunks, returning %d splits: %s"%(numChunks, len(splits), splits))
 
 
     finally:
@@ -395,9 +402,9 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     #sb.replace(orig_URI_string[server_start:server_end], new_URI)
     if slave_OK is not None:
         if "?" in orig_URI_string:
-            sb = sb + "&slaveok=" + str(slave_OK)
+            sb = sb + "&slaveok=" + str(slave_OK).lowcase
         else:
-            sb = sb + "?slaveok=" + str(slave_OK)
+            sb = sb + "?slaveok=" + str(slave_OK).lowcase
 
     ans = MongoURI_PREFIX + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans )
