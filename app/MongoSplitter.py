@@ -225,7 +225,7 @@ def fetch_splits_from_shards(config, uri, slaveOk):
     connection = getConnection(uri)
     
     configDB = connection["config"]
-    shardsColl = db[config.get("shards")]
+    shardsColl = configDB["shards"]
 
     shardSet = set()
     cur = shardsColl.find()
