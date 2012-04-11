@@ -316,45 +316,52 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             for key in minObj:
                 tMin = minObj[key]
                 tMax = (row.get('max'))[key]
+
+                if tMin!= "MinKey":
+                    min[key] = tMin
+                if tMax != "MaxKey":
+                    max[key] = tMax
+
     #if (The splitFriendyDBCallBack calls here!!!!)
 	#Ask 10gen guys.
 	#
 	#
-            if originalQuery == None:
-                originalQuery = bson.son.SON()
-            
-            shardKeyQuery["$min"] = min
-            shardKeyQuery["$max"] = max
-            shardKeyQuery["$query"] = originalQuery
+             
+        if originalQuery == None:
+            originalQuery = bson.son.SON()
+        
+        shardKeyQuery["$min"] = min
+        shardKeyQuery["$max"] = max
+        shardKeyQuery["$query"] = originalQuery
 
-            logging.debug("["+numChunks+"/"+numExpectedChunks+"] new query is: "+shardKeyQuery)
+        logging.debug("["+numChunks+"/"+numExpectedChunks+"] new query is: "+shardKeyQuery)
 
-            inputURI = config.get("inputURI")
+        inputURI = config.get("inputURI")
 
-            if useShards:
-                shardName = row.get('shard')
-                host = shardMap[shardName]
-                inputURI = getNewURI(inputURI,host,slaveOk)
-	
-            splits.append(MongoInputSplit(
-                inputURI,
-                config.get("inputKey"),
-                config.get("query"),
-                config.get("fields"),
-                config.get("sort"),
-                config.get("limit", 0),
-                config.get("skip", 0),
-                config.get("timeout", True)))
-			
+        if useShards:
+            shardName = row.get('shard')
+            host = shardMap[shardName]
+            inputURI = getNewURI(inputURI,host,slaveOk)
+
+        splits.append(MongoInputSplit(
+            inputURI,
+            config.get("inputKey"),
+            config.get("query"),
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit", 0),
+            config.get("skip", 0),
+            config.get("timeout", True)))
+        
         logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were %d chunks, returning %d splits: %s"%(numChunks, len(splits), splits))
 
-        return [s.format_uri_with_query() for s in splits]
 
     finally:
         if cur != None:
             cur.close()
             
 
+    return [s.format_uri_with_query() for s in splits]
 
 def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
