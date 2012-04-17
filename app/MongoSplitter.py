@@ -323,11 +323,13 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
 
             #@to-do do type comparison first
+            '''Looks no need to do following
                 if tMin!= "MinKey":
                     min[key] = tMin
                 if tMax != "MaxKey":
                     max[key] = tMax
 
+            '''
     #if (The splitFriendyDBCallBack calls here!!!!)
 	#Ask 10gen guys.
 	#
