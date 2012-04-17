@@ -46,9 +46,9 @@ def calculate_splits(config):
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
-    useShards = False #config.canReadSplitsFromShards()
-    useChunks = False #config.isShardChunkedSplittingEnabled()
-    slaveOk = True #config.canReadSplitsFromSecondary()
+    useShards = config.get("useShards",False) #config.canReadSplitsFromShards()
+    useChunks = config.get("useChunks",False)
+    slaveOk = config.get("slaveOk",False) #config.canReadSplitsFromSecondary()
 
     logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
 
@@ -59,7 +59,7 @@ def calculate_splits(config):
                 logging.warn( "Combining 'use chunks' and 'read from shards directly' can have unexpected & erratic behavior in a live system due to chunk migrations. " )
 
             logging.info( "Sharding mode calculation entering." )
-            return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri, mongo )
+            return calculate_sharded_splits( config, useShards, useChunks, slaveOk, uri)
 
         else: # perfectly ok for sharded setups to run with a normally calculated split. May even be more efficient for some cases
             logging.info( "Using Unsharded Split mode (Calculating multiple splits though)" )
@@ -366,8 +366,8 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         if cur != None:
             cur.close()
             
-    return splits
-    #return [s.format_uri_with_query() for s in splits]
+    #return splits
+    return [s.format_uri_with_query() for s in splits]
 
 def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
