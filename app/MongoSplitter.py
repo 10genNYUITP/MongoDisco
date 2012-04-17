@@ -319,7 +319,6 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
             for key in minObj:
                 tMin = minObj[key]
-                print tMin, type(tMin)
                 tMax = (row.get('max'))[key]
 
 
@@ -337,9 +336,9 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             if originalQuery == None:
                 originalQuery = bson.son.SON()
             
+            shardKeyQuery["$query"] = originalQuery
             shardKeyQuery["$min"] = min
             shardKeyQuery["$max"] = max
-            shardKeyQuery["$query"] = originalQuery
 
             #logging.debug("["+numChunks+"/"+numExpectedChunks+"] new query is: "+shardKeyQuery)
 
@@ -367,8 +366,8 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         if cur != None:
             cur.close()
             
-
-    return [s.format_uri_with_query() for s in splits]
+    return splits
+    #return [s.format_uri_with_query() for s in splits]
 
 def get_new_URI(original_URI, new_URI, slave_OK):
     """@todo: Docstring for get_new_URI
@@ -402,9 +401,9 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     #sb.replace(orig_URI_string[server_start:server_end], new_URI)
     if slave_OK is not None:
         if "?" in orig_URI_string:
-            sb = sb + "&slaveok=" + str(slave_OK).lowcase
+            sb = sb + "&slaveok=" + str(slave_OK).lower()
         else:
-            sb = sb + "?slaveok=" + str(slave_OK).lowcase
+            sb = sb + "?slaveok=" + str(slave_OK).lower()
 
     ans = MongoURI_PREFIX + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans )

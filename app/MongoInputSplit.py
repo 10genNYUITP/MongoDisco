@@ -47,7 +47,8 @@ class MongoInputSplit():
         database_name = uri_info['database']
         collection_name = uri_info['collection']
 
-        connection = getConnection(inputURI)
+        #connection = getConnection(inputURI)
+        connection = Connection(inputURI)
         db = connection[database_name]
         collection = db[collection_name]
         logging.info("LOOK HERE")
