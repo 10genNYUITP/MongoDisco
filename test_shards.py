@@ -80,7 +80,7 @@ if __name__ == '__main__':
 
     print "total count : ", totalCount
 
-    test_traditional_way()
+    #test_traditional_way()
 
 def test_chunks():
 
@@ -92,6 +92,8 @@ def test_chunks():
 
     splits = MS.fetch_splits_via_chunks(config,uri,useShards,slaveOk);
     print splits
+
+    '''
     print "splits count: %d" %len(splits)
     count = 0
     for split in splits:
@@ -99,4 +101,5 @@ def test_chunks():
             count +=1
         
     print count
+    '''
 
