@@ -16,8 +16,8 @@ query['$max'] = max
 print query
 
 col = getCollection(uri)
-cursor = col.find( spec =query,slave_okay= True)
-print cursor.count(True)
+cursor = col.find_one( query)
+print cursor
 
 count = 0
 for row in cursor:
