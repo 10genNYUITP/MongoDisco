@@ -9,9 +9,10 @@ Description: Configuration helper tool for MongoDB related Map/Reduce jobs Insta
 import logging
 import bson
 
-config = default_config
-
-default_config = {
+'''
+Global variable config: Holds the configuration options for the application. Default config is the configuration options set in this file.
+'''
+config = {
         "jobVerbose" : False,
         "jobBackground" : False,
         "jobMapper" : "",
@@ -45,8 +46,11 @@ default_config = {
         "db_name" : "test",
         }
 
-# create a method to accept the client's default config dictionary. This method should return values from the client specified config, if exists, or from the default_config file
-
+'''
+Method: readConfigFile
+Description: To override the default configuration options.
+Argument: clientConfigDict - overriding configuration dictionary
+'''
 def readConfigFile(clientConfigDict):
     global config
     config = clientConfigDict
