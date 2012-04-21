@@ -1,0 +1,6 @@
+## MongoDB => Disco Mapreduce Adapter
+
+#### Goal
+The goal of this project is to provide a simple and easy way to use your mongodb data for the Disco map reduce jobs. It is implemented in a similar fashion as [MongoDB Hadoop Adapter](https://github.com/mongodb/mongo-hadoop)
+
+
