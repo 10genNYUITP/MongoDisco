@@ -54,4 +54,4 @@ if __name__ == '__main__':
             )
 
     for year, avg in result_iterator(job.wait(show=True)):
-        print "Average 10 Year treasury for %s was %s" % (year, avg))
+        print ("Average 10 Year treasury for %s was %s" % (year, avg))
