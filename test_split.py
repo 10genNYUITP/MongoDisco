@@ -33,9 +33,9 @@ class TestSplits(unittest.TestCase):
         #print db.command("collstats", coll.full_name)
 
         #NOTE: need to run this code once to populate the database, after that comment it out
-        #for i in range(40000):
-          #  post = {"name" : i, "date": datetime.datetime.utcnow()}
-           # coll.insert(post)
+        for i in range(40000):
+            post = {"name" : i, "date": datetime.datetime.utcnow()}
+            coll.insert(post)
 
 
 
