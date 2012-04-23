@@ -6,6 +6,7 @@ File: twitter_tz.py
 Author: AFlock
 Description: Given a database of tweets, aggregate number of tweets per timezone
 Note: before running this job fill a mongodb with tweets by running :
+curl https://stream.twitter.com/1/statuses/sample.json -u<user>:<pass> | mongoimport -c twitter
 
 
 '''
@@ -15,7 +16,7 @@ from mongodb_io        import mongodb_input_stream
 from app.MongoSplitter import calculate_splits
 
 config = {
-        "inputURI":"mongodb://localhost/twitter.in",
+        "inputURI":"mongodb://localhost/twitter",
         "createInputSplits" : True,
         }
 
