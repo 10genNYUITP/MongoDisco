@@ -8,6 +8,10 @@ import bson.son as son
 import json
 import logging
 
+'''
+File: scheme_mongo_clean.py
+Description: 
+'''
 def open(uri, task=None):
     #parses a mongodb uri and returns the database
     #"mongodb://localhost/test.in?"
