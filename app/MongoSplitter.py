@@ -175,7 +175,8 @@ def calculate_single_split(config):
     #splits = [None] * 1 #will return this list's URI
     splits = []
     print "calculating single split"
-    
+    query = bson.son.SON()
+
     splits.append(MongoInputSplit(
             config.get("inputURI"),
             config.get("inputKey"),
@@ -186,13 +187,12 @@ def calculate_single_split(config):
             config.get("skip", 0),
             config.get("timeout", True)))
 
-    
+
     logging.debug("Calculated %d split objects"% len(splits) )
     logging.debug("Dump of calculated splits ... ")
     for s in splits:
-        logging.debug("    Split: %s"% split)
+        logging.debug("    Split: %s"% s.__str__())
     return [s.format_uri_with_query() for s in splits]
-#pass
 
 
 def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
@@ -208,7 +208,7 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
         splits = fetch_splits_from_shards(config, uri, slaveOk)
     else:
         logging.error("Neither useChunks nor useShards enabled; failed to pick a valid state.")
-    
+
     if splits == None:
         logging.error("Failed to create/calculate Input Splits from Shard Chunks; final splits content is 'None'." )
 
@@ -223,13 +223,13 @@ def fetch_splits_from_shards(config, uri, slaveOk):
     """
     logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results")
     connection = getConnection(uri)
-    
+
     configDB = connection["config"]
     shardsColl = configDB["shards"]
 
     shardSet = set()
     cur = shardsColl.find()
-    
+
     try:
         for row in cur:
             host = row.get('host')
@@ -244,15 +244,15 @@ def fetch_splits_from_shards(config, uri, slaveOk):
 
     splits = []
     for host in shardSet:
-        splits.append(MongoInputSplit(config.get("inputURI"), 
-                config.get("inputKey"), 
-                config.get("query"), 
-                config.get("fields"), 
-                config.get("sort"), 
-                config.get("limit", 0), 
-                config.get("skip", 0), 
+        splits.append(MongoInputSplit(config.get("inputURI"),
+                config.get("inputKey"),
+                config.get("query"),
+                config.get("fields"),
+                config.get("sort"),
+                config.get("limit", 0),
+                config.get("skip", 0),
                 config.get("timeout", True)))
-    
+
     return [s.format_uri_with_query() for s in splits]
 
 
@@ -266,9 +266,9 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results" )
 
     logging.debug("fetch_splits_via_chunks: originalQuery: %s"% originalQuery)
-    
+
     connection = getConnection(uri)
-    
+
     configDB = connection["config"]
 
     shardMap = {}
@@ -287,7 +287,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         finally:
             if cur != None:
                 cur.close()
-        
+
     logging.debug( "MongoInputFormat.getSplitsUsingChunks(): shard map is: %s"% shardMap )
 
     chunksCollection = configDB["chunks"]
@@ -309,7 +309,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         numExpectedChunks = cur.count
 
         splits = []
-        
+
         for row in cur:
             numChunks += 1
             minObj = row.get('min')
@@ -330,10 +330,10 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 	#Ask 10gen guys.
 	#
 	#
-             
+
             if originalQuery == None:
                 originalQuery = bson.son.SON()
-            
+
             shardKeyQuery["$query"] = originalQuery
             shardKeyQuery["$min"] = min
             shardKeyQuery["$max"] = max
@@ -356,14 +356,14 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
                 config.get("limit", 0),
                 config.get("skip", 0),
                 config.get("timeout", True)))
-            
+
             #logging.debug("MongoInputFormat.fetch_splits_via_chunks(): There were %d chunks, returning %d splits: %s"%(numChunks, len(splits), splits))
 
 
     finally:
         if cur != None:
             cur.close()
-            
+
     #return splits
     return [s.format_uri_with_query() for s in splits]
 
@@ -395,7 +395,7 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     server_start = idx + 1
 
     sb = orig_URI_string[0:server_start]+ new_URI + orig_URI_string[server_end:]
-    
+
     #sb.replace(orig_URI_string[server_start:server_end], new_URI)
     if slave_OK is not None:
         if "?" in orig_URI_string:
