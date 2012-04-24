@@ -24,31 +24,22 @@ from pymongo.uri_parser import (_partition,
 
 def calculate_splits(config):
     """reads config to find out what type of split to perform"""
-    #pass
+    #if the user does not specify an inputURI we will need to construct it from the db/collection name TODO
     uri = config.get("inputURI") if "inputURI" in config else "mongodb://localhost/test.in"
-
-    #HACK -> make config align with this ^^
     config['inputURI'] = uri
-    #/HACK
-
-    #config.getInputURI()
     uri_info = uri_parser.parse_uri(uri)
 
     database_name = uri_info['database']
     collection_name = uri_info['collection']
 
-    '''
-    connection = getConnection(uri)
-    db = connection[database_name]
-    '''
 
     db = getDatabase(uri)
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
-    useShards = config.get("useShards",False) #config.canReadSplitsFromShards()
+    useShards = config.get("useShards",False)
     useChunks = config.get("useChunks",False)
-    slaveOk = config.get("slaveOk",False) #config.canReadSplitsFromSecondary()
+    slaveOk = config.get("slaveOk",False)
 
     logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
 
@@ -80,27 +71,15 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
     """
     splits = [] #will return this list
-    print "calculating unsharded splits"
+    logging.info("Calculating unsharded splits")
 
-    # TODO: pass these fields VV as parameters? (02/26/12, 11:30, AFlock)
-    '''
-    connection = getConnection(uri)
-    db = getDatabase(uri)
-    coll = db[config.get('collection_name')]
-    '''
     coll = getCollection(uri)
 
     q = {} if not "query" in config else config.get("query")
 
-    print 'in unsharded splits'
-    #print 'query in MongoSplitter is ' + q
-    #for key in q:
-        #print 'am I printing the query?'
-        #print q[key]
-
-    #create command
+    #create the command to do the splits
     #command to split should look like this VV
-    #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', False), ('keyPattern', {'x': 1})])
+    #SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2), ('force', True), ('keyPattern', {'x': 1})])
     split_key = config.get('splitKey')
     split_size = config.get('splitSize')
     full_name  = coll.full_name
@@ -115,11 +94,10 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     cmd["force"]        = True
 
     logging.debug("Issuing Command: %s" % cmd)
-    print "Issuing Command: %s" % cmd
     data = coll.database.command(cmd)
-    print data
+    logging.debug("%r" % data)
 
-    #results look like this VV
+    #results should look like this
     #{u'ok': 1.0, u'splitKeys': [{u'_id': ObjectId('4f49775348d9846c5e582b00')}, {u'_id': ObjectId('4f49775548d9846c5e58553b')}]}
 
     if data.get("err"):
@@ -135,7 +113,6 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     else:
         logging.info("Calculated %s splits" % len(split_data))
 
-        # TODO: what is the query q parameter? (02/26/12, 12:18, AFlock)
         last_key = None
         for bound in split_data:
             splits.append(_split(config, q, last_key, bound))
@@ -146,7 +123,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
 
 
 def _split(config=None, q={}, min=None, max=None):
-    """@todo: Docstring for _split
+    """ constructs a split object to be used later
     :returns: an actual MongoSplit object
     """
     print "_split being created"
@@ -172,7 +149,6 @@ def _split(config=None, q={}, min=None, max=None):
             config.get("timeout", True))
 
 def calculate_single_split(config):
-    #splits = [None] * 1 #will return this list's URI
     splits = []
     print "calculating single split"
     query = bson.son.SON()
@@ -196,9 +172,8 @@ def calculate_single_split(config):
 
 
 def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
-    """Worry about this after unsharded splits are doen
-
-    :returns: @todo
+    """Calculates splits fetching them directly from a sharded setup
+    :returns: A list of sharded splits
     """
     splits = []
     if useChunks:
@@ -212,14 +187,14 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
     if splits == None:
         logging.error("Failed to create/calculate Input Splits from Shard Chunks; final splits content is 'None'." )
 
-    logging.debug("Calculated splits and returning them - splits: ", splits)
+    logging.debug("Calculated splits and returning them - splits: %r" % splits)
     return splits
 
 
 def fetch_splits_from_shards(config, uri, slaveOk):
-    """@todo: Docstring for fetch_splits_from_shards
+    """Internal method to fetch splits from shareded db
 
-    :returns: @todo
+    :returns: The splits
     """
     logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results")
     connection = getConnection(uri)
@@ -257,9 +232,9 @@ def fetch_splits_from_shards(config, uri, slaveOk):
 
 
 def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
-    """@todo: Docstring for fetch_splits_via_chunks
+    """Retrieves split objects based on chunks in mongo
 
-    :returns: @todo
+    :returns: The splits
     """
     originalQuery = config.get("query")
     if useShards:
@@ -293,8 +268,6 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     chunksCollection = configDB["chunks"]
     print configDB.collection_names()
     query = bson.son.SON()
-    #db = connection[config['db_name']]
-    #query["$ns"] = db + "." + db[config['collection_name']]
 
     uri_info = uri_parser.parse_uri(uri)
     query["ns"] = uri_info['database']+'.'+uri_info['collection']
@@ -328,8 +301,6 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
     #if (The splitFriendyDBCallBack calls here!!!!)
 	#Ask 10gen guys.
-	#
-	#
 
             if originalQuery == None:
                 originalQuery = bson.son.SON()
@@ -368,15 +339,10 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     return [s.format_uri_with_query() for s in splits]
 
 def get_new_URI(original_URI, new_URI, slave_OK):
-    """@todo: Docstring for get_new_URI
-
-    :original_URI: @todo
-    :etc: @todo
+    """
     :returns: a new Mongo_URI
     """
 
-#    pass
-    #orig_URI_string = SCHEME_LEN
     MongoURI_PREFIX = "mongodb://"
     orig_URI_string = original_URI[len(MongoURI_PREFIX):]
 
@@ -396,7 +362,6 @@ def get_new_URI(original_URI, new_URI, slave_OK):
 
     sb = orig_URI_string[0:server_start]+ new_URI + orig_URI_string[server_end:]
 
-    #sb.replace(orig_URI_string[server_start:server_end], new_URI)
     if slave_OK is not None:
         if "?" in orig_URI_string:
             sb = sb + "&slaveok=" + str(slave_OK).lower()
