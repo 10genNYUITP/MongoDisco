@@ -6,6 +6,15 @@ from app import MongoSplitter as MS
 import datetime
 import bson
 
+'''
+File: test_split.py
+Description: This module tests the creation of splits by MongoSplitter. THe test attempts to create splits on data inserted in collection "in" and verifies against the manual number of splits created by using the default splitSize.
+Author/s: NYU ITP team
+'''
+
+'''
+Description: Default configuration for inserting and reading the data.
+'''
 config = {
         "db_name": "test",
         "collection_name": "in",
@@ -15,6 +24,10 @@ config = {
         "splitKey": {'_id' : 1},
         }
 
+
+'''
+Description: Configuration used to insert splits (created by MongoSplitter) into various collections and verify against original data.
+'''
 config2 = {
         "db_name": "test",
         "collection_name": "tempSplit",
@@ -24,6 +37,9 @@ config2 = {
         "splitKey": {'_id' : 1},
         }
 
+'''
+Test case to check MongoSplitter.
+'''
 class TestSplits(unittest.TestCase):
     def runTest(self):
         #put 20000 objects in a database, call for a split by hand, then a split by the class
