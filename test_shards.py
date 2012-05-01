@@ -95,13 +95,3 @@ def test_chunks():
     splits = MS.fetch_splits_via_chunks(config,uri,useShards,slaveOk);
     print splits
 
-    '''
-    print "splits count: %d" %len(splits)
-    count = 0
-    for split in splits:
-        for row in split.cursor:
-            count +=1
-        
-    print count
-    '''
-

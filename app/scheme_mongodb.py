@@ -10,62 +10,6 @@ import logging
 
 def open(url=None, task=None):
 
-    '''
-    #parses a mongodb uri and returns the database
-    #"mongodb://localhost/test.in?query='{"key": value}'"
-    uri = url if url else "mongodb://localhost/test.in"
-
-    #print 'uri: ' + uri
-    params = uri.split('?', 1)
-    uri = params[0]
-    uri_info = uri_parser.parse_uri(uri)
-    query = None
-    #TODO test flow from a query
-    #parse json to a dict = q_d
-    # ^^ this is where we use json_util.object_hook
-    #SON()['query'] = q_d['query']
-    #for k,v  in q_d.iteritems:
-    #   if k not "query":
-    #      SON[k] = v
-    options = {}
-    if len(params) > 1:
-        params = params[1]
-        #another easy way to parse parameters
-        #from urlparse import parse_qs
-        #return a dict {'key',['value']}
-        #e.g {'limit':['100'],'skip':['99']}
-        #dict_of_params = parse_qs(params)
-
-        list_of_params = params.split('&', 1)
-        for p in list_of_params:
-            name, json_obj = p.split('=') #shouldn't be p.split('=')?
-            if name == 'query':
-                query = son.SON(json.loads(json_obj, object_hook=json_util.object_hook))
-            elif name == 'fields':
-                pass
-            elif name == 'limit' or name == 'skip':
-                pass
-            elif name == 'timeout' or name == 'slave_okay':
-                pass
-            elif name == 'sort':
-                pass
-            else:
-                options[name] = json_obj
-                #@to-do get other parameters from url
-                #do type convertion as needed
-
-        query = son.SON()
-        li_q = json.loads(json_query)
-        for tupl in li_q:
-            if tupl[0] == "$max" or tupl[0] == "$min":
-                obj_id = bson.objectid.ObjectId(tupl[1])
-                query[tupl[0]] = {u'_id' : obj_id}
-            else:
-                query[tupl[0]] = tupl[1]
-    if not query:
-        query = {}
-        '''
-    
     query = son.SON(json.loads(url, object_hook=json_util.object_hook))
     uri = query['inputURI']
     uri_info = uri_parser.parse_uri(uri)
