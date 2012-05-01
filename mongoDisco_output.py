@@ -5,8 +5,9 @@ class MongoDBoutput(object):
     def __init__(self,stream,params):
         import pymongo
         from pymongo import Connection,uri_parser
+        #from app.MongoCongfigUtil import config
+        #self.uri =  config.get('OutputURI','mongodb://localhost/test.out')
         self.uri = "mongodb://localhost/test.out"
-        #self.uri = url if url else "mongodb://localhost/test.out"
 
         uri_info = uri_parser.parse_uri(self.uri)
         nodes = set()
@@ -39,8 +40,8 @@ class MongoDBoutput(object):
         self.stream = stream
         self.params = params
 
-        self.key_name = "word"#Should read from config
-        self.value_name = "count"
+        self.key_name = "key" #config.get('JobOutputKey','key')
+        self.value_name ="value" # config.get('JobOutputValue','value')
 
 
     def add(self,key,val):
