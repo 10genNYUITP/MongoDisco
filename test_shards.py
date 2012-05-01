@@ -35,7 +35,8 @@ config = {
 
 def map(record,params):
     age = record.get('age',0)/10
-    yield age, 1
+    range = str(age*10)+"--"+str(age*10+9)
+    yield range, 1
 
 def reduce(iter,params):
     from disco.util import kvgroup
@@ -69,6 +70,7 @@ if __name__ == '__main__':
             map = map,
             reduce = reduce,
             map_input_stream = mongodb_input_stream,
+            reduce_output_stream = mongodb_output_stream
             )
     
 
