@@ -9,6 +9,7 @@ import json
 import logging
 
 def open(url=None, task=None):
+    from mongo_util import getCollection
 
     query = son.SON(json.loads(url, object_hook=json_util.object_hook))
     uri = query['inputURI']
@@ -57,9 +58,12 @@ class MongoWrapper(object):
 
 
 def input_stream(stream, size, url, params):
+    from scheme_mongodb import open
     mon = open(url)
     return mon
 
+
+'''
 def getConnection(uri):
     uri_info = uri_parser.parse_uri(uri)
     nodes = set()
@@ -95,3 +99,4 @@ def getCollection(uri):
             raise ConfigurationError("authentication failed")
 
     return connection[db][col]
+'''
