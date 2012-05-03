@@ -9,7 +9,7 @@ Description: Holds the specification for an individual
 import sys, os, logging
 import json
 from bson import json_util,son
-from mongoUtil import getConnection
+from mongo_util import getConnection
 from pymongo import Connection, uri_parser
 from pymongo.uri_parser import (_partition,
                                 _rpartition,

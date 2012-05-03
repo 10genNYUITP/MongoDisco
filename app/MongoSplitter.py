@@ -10,7 +10,7 @@ and store/return them in MongoSplit objects
 from pymongo import Connection, uri_parser
 from sets import Set
 from MongoInputSplit import MongoInputSplit
-from mongoUtil import getCollection, getConnection,getDatabase
+from mongo_util import getCollection, getConnection,getDatabase
 
 import logging
 import bson
