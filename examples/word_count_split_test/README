@@ -7,4 +7,5 @@ run:
 
 start-servers.sh
 load-data.sh
-java WordCountSplitTest
+
+python word_count_split_test.py

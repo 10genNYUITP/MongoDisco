@@ -5,7 +5,16 @@ from app.MongoSplitter import calculate_splits
 from disco.core import Job, result_iterator
 from mongodb_io import mongodb_output_stream, mongodb_input_stream
 
+'''
+File: word_count.py
+Description: An example that tests the MongoHadoop adapter to read a text file, print the distinct words in the file and their count.
+Author/s: NYU ITP Team
+To run: Run as python word_count.py
+'''
 
+'''
+Configuration settings for Mongo-Disco adapter for this example
+'''
 config = {
         "inputURI":"http://discoproject.org/media/text/chekhov.txt",
         "outputURI":"mongodb://localhost/test.out",
