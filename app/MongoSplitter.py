@@ -21,8 +21,8 @@ def calculate_splits(config):
     #if the user does not specify an inputURI we will need to construct it from
     #the db/collection name TODO
 
-    uri = config.get("inputURI", "mongodb://localhost/test.in")
-    config['inputURI'] = uri
+    uri = config.get("input_uri", "mongodb://localhost/test.in")
+    config['input_uri'] = uri
     uri_info = uri_parser.parse_uri(uri)
 
     #database_name = uri_info['database']
@@ -32,14 +32,14 @@ def calculate_splits(config):
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
-    useShards = config.get("useShards", False)
-    useChunks = config.get("useChunks", False)
-    slaveOk = config.get("slaveOk", False)
+    useShards = config.get("use_shards", False)
+    useChunks = config.get("use_chunks", False)
+    slaveOk = config.get("slave_ok", False)
 
     logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? \
         - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
 
-    if config.get("createInputSplits"):
+    if config.get("create_input_splits"):
         logging.info("Creation of Input Splits is enabled.")
         if isSharded and (useShards or useChunks):
             if useShards and useChunks:
@@ -85,8 +85,8 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     # SON([('splitVector', u'test.test_data'), ('maxChunkSize', 2),
     #    ('force', True), ('keyPattern', {'x': 1})])
 
-    split_key = config.get('splitKey')
-    split_size = config.get('splitSize')
+    split_key = config.get('split_key')
+    split_size = config.get('split_size')
     full_name  = coll.full_name
     logging.info("Calculating unsharded splits on collection %s with Split Key %s" %
             (full_name, split_key))
@@ -109,7 +109,6 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     if data.get("err"):
         raise Exception(data.get("err"))
     elif data.get("ok") != 1.0:
-        print data
         raise Exception("Unable to calculate splits")
 
     split_data = data.get('splitKeys')
@@ -146,8 +145,8 @@ def _split(config=None, q={}, min=None, max=None):
     logging.info("Assembled Query: ", query)
 
     return MongoInputSplit(
-            config.get("inputURI"),
-            config.get("inputKey"),
+            config.get("input_uri"),
+            config.get("input_key"),
             query,
             config.get("fields"),
             config.get("sort"),
@@ -162,8 +161,8 @@ def calculate_single_split(config):
     query = bson.son.SON()
 
     splits.append(MongoInputSplit(
-            config.get("inputURI"),
-            config.get("inputKey"),
+            config.get("input_uri"),
+            config.get("input_key"),
             query,
             config.get("fields"),
             config.get("sort"),
@@ -227,8 +226,8 @@ def fetch_splits_from_shards(config, uri, slaveOk):
 
     splits = []
     for host in shardSet:
-        splits.append(MongoInputSplit(config.get("inputURI"),
-                config.get("inputKey"),
+        splits.append(MongoInputSplit(config.get("input_uri"),
+                config.get("input_key"),
                 config.get("query"),
                 config.get("fields"),
                 config.get("sort"),
@@ -313,7 +312,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             shardKeyQuery["$min"] = min
             shardKeyQuery["$max"] = max
 
-            inputURI = config.get("inputURI")
+            inputURI = config.get("input_uri")
 
             if useShards:
                 shardName = row.get('shard')
@@ -322,7 +321,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
             splits.append(MongoInputSplit(
                 inputURI,
-                config.get("inputKey"),
+                config.get("input_key"),
                 shardKeyQuery,
                 config.get("fields"),
                 config.get("sort"),
