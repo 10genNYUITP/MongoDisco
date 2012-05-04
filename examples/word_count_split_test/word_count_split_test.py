@@ -8,21 +8,23 @@ import bson
 from app.mongoUtil import getCollection
 
 config = {
-        "inputURI":"mongodb://localhost:30000/test.lines",
-        "outputURI":"mongodb://localhost/test.out",
-        "slaveOk":True,
-        "useShards":True,
-        "createInputSplits":True,
-        "useChunks":True
-        }
-		
+        "inputURI": "mongodb://localhost:30000/test.lines",
+        "outputURI": "mongodb://localhost/test.out",
+        "slaveOk": True,
+        "useShards": True,
+        "createInputSplits": True,
+        "useChunks": True}
+
+
 def map(line, params):
     for word in line.split():
         yield word, 1
 
+
 def reduce(iter, params):
     for word, counts in kvgroup(sorted(iter)):
         yield word, sum(counts)
+
 
 def test(use_shards, use_chunks, slaveOk, useQuery):
     if useQuery:
@@ -45,12 +47,11 @@ def test(use_shards, use_chunks, slaveOk, useQuery):
     if slaveOk != None:
         output_table += "_" + slaveOk
 
-    config['outputURI'] = "mongodb://localhost:30000/test." +output_table
-    job = Job().run(input=calculate_splits(config) ,
-            map = map,
-            reduce = reduce,
-            map_input_stream = mongodb_input_stream
-            )
+    config['outputURI'] = "mongodb://localhost:30000/test." + output_table
+    job = Job().run(input=calculate_splits(config),
+            map=map,
+            reduce=reduce,
+            map_input_stream=mongodb_input_stream)
 
     for word, count in result_iterator(job.wait(show=True)):
         print word, count
@@ -59,11 +60,12 @@ def test(use_shards, use_chunks, slaveOk, useQuery):
     col = getCollection(config['outputURI'])
     cur = col.find_one(q)
     for data in cur:
-        print("the count of \'the\' is: %d"%data);
-    
+        print("the count of \'the\' is: %d" % data)
+
+
 if __name__ == '__main__':
     useQuery = False
-    tf = [True,  False]
+    tf = [True, False]
     ntf = [None, True, False]
     for use_shards in tf:
         for use_chunks in tf:
