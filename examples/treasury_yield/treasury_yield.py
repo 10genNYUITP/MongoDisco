@@ -28,30 +28,31 @@ example record:
 
 #this is the config file for the  mongosplitter
 config = {
-        "inputURI":"mongodb://localhost/yield_historical.in",
-        "slaveOk":True,
-        "useShards":True,
-        "createInputSplits":True,
-        "useChunks":True
-        }
+        "inputURI": "mongodb://localhost/yield_historical.in",
+        "slaveOk": True,
+        "useShards": True,
+        "createInputSplits": True,
+        "useChunks": True}
+
 
 def map(record, params):
-    time = record['_id']['$date']/1000
-    year =  datetime.datetime.fromtimestamp(time).date().year
+    time = record['_id']['$date'] / 1000
+    year = datetime.datetime.fromtimestamp(time).date().year
     yield year, record['bc10year']
+
 
 def reduce(iter, params):
     from disco.util import kvgroup
     for year, bid_prices in kvgroup(sorted(iter)):
-        avg = sum(bid_prices)/len(bid_prices)
+        avg = sum(bid_prices) / len(bid_prices)
         yield year, avg
 
+
 if __name__ == '__main__':
-    job = Job().run(input=calculate_splits(config) ,
-            map = map,
-            reduce = reduce,
-            map_input_stream = mongodb_input_stream
-            )
+    job = Job().run(input=calculate_splits(config),
+            map=map,
+            reduce=reduce,
+            map_input_stream=mongodb_input_stream)
 
     for year, avg in result_iterator(job.wait(show=True)):
         print "Average 10 Year treasury for %s was %s" % (year, avg)
