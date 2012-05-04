@@ -9,49 +9,46 @@ Description: Configuration helper tool for MongoDB related Map/Reduce jobs Insta
 import logging
 import bson
 
-'''
-Global variable config: Holds the configuration options for the application. Default config is the configuration options set in this file.
-'''
-config = {
-        "jobVerbose" : False,
-        "jobBackground" : False,
-        "jobMapper" : "",
-        "jobReducer" : "",
-        "jobCombiner" : "",
-        "jobPartitioner" : "",
-        "jobSortComparator" : "",
-        "jobMapperOutputKey" : "",
-        "jobMapperOutputValue" : "",
-        "jobInputFormat" : "",
-        "jobOutputFormat" : "",
-        "jobOutputKey" : "",
-        "jobOutputValue" : "",
-        "inputURI" : "",
-        "outputURI" : "",
-#        "INPUT_SPLIT_SIZE" : Value to specify how many docs input is split into. Affects the number of mappers.,
-        "splitSize" : 8,
-        "splitKey" : {'_id' : 1},
-        "createInputSplits" : True,
-        "splitsUseShards" : False,
-        "splitsUseChunks" : True,
-        "splitsSlaveOK" : False,
-        "limit" : 0,
-        "skip" : 0,
-        "inputKey" : "",
-        "sort" : "",
-        "is_no_timeout" : False,
-        "fields" : "",
-        "query" : "",
-        "collection_name" : "in",
-        "db_name" : "test",
-        }
+class Configuration():
 
-'''
-Method: readConfigFile
-Description: To override the default configuration options.
-Argument: clientConfigDict - overriding configuration dictionary
-'''
-def readConfigFile(clientConfigDict):
-    global config
-    config = clientConfigDict
-    
+    '''
+    Global variable config: 
+    Holds the configuration options for the application. 
+    Default config is the configuration options set in this file.
+    '''
+
+    config = {
+            "job_output_key" : "_id",
+            "job_output_value" : "",
+            "input_uri" : "",
+            "output_uri" : "",
+    #        "INPUT_SPLIT_SIZE" : Value to specify how many docs input is split into. Affects the number of mappers.,
+            "split_size" : 8,
+            "split_key" : {'_id' : 1},
+            "create_input_splits" : True,
+            "splits_use_shards" : False,
+            "splits_use_chunks" : True,
+            "slaveok" : False,
+            "limit" : 0,
+            "skip" : 0,
+            "inputKey" : None,
+            "sort" : None,
+            "timeout" : False,
+            "fields" : None,
+            "query" : {},
+            }
+
+    '''
+    Method: read_config
+    Description: To override the default configuration options.
+    Argument: clientConfigDict - overriding configuration dictionary
+    '''
+    @staticmethod
+    def read_config(clientConfigDict):
+        for item in clientConfigDict:
+            Configuration.config[item] = clientConfigDict[item]
+
+    @staticmethod
+    def get_config():
+        return Configuration.config
+        
