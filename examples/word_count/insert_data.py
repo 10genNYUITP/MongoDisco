@@ -18,9 +18,7 @@ if __name__ == '__main__':
     logfile = open("beyond_lies_the_wub.txt","r").readlines()
     print 'opened file'
     for line in logfile:
-        #print ', and line is %s'%line
         for word in line.split():
             post = {"file_text" : word, "date" : datetime.datetime.utcnow()}
-            print 'post: %s '%post
             coll.insert(post)
             
