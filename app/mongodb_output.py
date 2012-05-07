@@ -3,21 +3,15 @@ class MongoOutput(object):
     '''Output stream for mongoDB 
     '''
     def __init__(self,stream,params):
-        import pymongo
-        from pymongo import Connection,uri_parser
-        from mongo_util import getConnection,getCollection
+        from mongo_util import get_connection,get_collection
         
         config = {}
         for key, value in params.__dict__.iteritems():
             config[key] = value
 
         self.uri =  config.get('output_uri','mongodb://localhost/test.out')
-        self.conn = getConnection(self.uri)
-        self.coll = getCollection(self.uri)
-
-        self.stream = stream
-        self.params = params
-
+        self.conn = get_connection(self.uri)
+        self.coll = get_collection(self.uri)
         self.key_name = config.get('job_output_key','_id')
         self.value_name = config.get('job_output_value','value')
 

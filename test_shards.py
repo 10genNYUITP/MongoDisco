@@ -1,35 +1,21 @@
-from app import MongoSplitter as MS
 import time
+from job import DiscoJob
 from disco.core import Job,result_iterator
 from mongodb_io import mongodb_output_stream,mongodb_input_stream
-from disco.schemes.scheme_mongodb import input_stream
-from app.MongoSplitter import calculate_splits as do_split
+from splitter import calculate_splits as do_split
 import pymongo
 from pymongo import Connection
-from app.mongoUtil import getCollection
-
-
-'''
-original_URI = "mongodb://localhost:9999/test.in"
-new_URI = "127.0.0.1:3333"
-
-original_URI_2 = "mongodb://wang:li@localhost:9999/test.in"
-original_URI_3 = "mongodb://wang:li@localhost:9999/"
-original_URI_4 = "mongodb://wang:li@localhost"
-
-print original_URI,MS.get_new_URI(original_URI,new_URI,True)
-print original_URI_2,MS.get_new_URI(original_URI_2,new_URI,None)
-print original_URI_3,MS.get_new_URI(original_URI_3,new_URI,False)
-print original_URI_4,MS.get_new_URI(original_URI_4,new_URI,False)
-
-'''
+from mongo_util import get_collection
 
 config = {
-        "inputURI":"mongodb://localhost/test.people",
-        "slaveOk":True,
-        "useShards":True,
-        "createInputSplits":True,
-        "useChunks":True
+        "input_uri":"mongodb://localhost/test.people",
+        "output_uri":"mongodb://localhost/test.out",
+        "slave_ok":True,
+        "use_shards":True,
+        "create_input_splits":True,
+        "use_chunks":False,
+        "job_output_key":"age",
+        "job_output_value":"number"
         }
 
 
@@ -46,7 +32,7 @@ def reduce(iter,params):
 def test_traditional_way():
     start = time.clock()
 
-    col = getCollection(config['inputURI'])
+    col = get_collection(config['input_uri'])
     count = {}
     cur = col.find()
     for row in cur:
@@ -65,33 +51,6 @@ def test_traditional_way():
 if __name__ == '__main__':
 
 
-    job = Job().run(
-            input = do_split(config),
-            map = map,
-            reduce = reduce,
-            map_input_stream = mongodb_input_stream,
-            reduce_output_stream = mongodb_output_stream
-            )
+    DiscoJob(config=config,map=map,reduce=reduce).run()
     
-
-    totalCount = 0;
-    for age, count in result_iterator(job.wait(show=True)):
-        range = str(age*10)+" -- "+str(age*10+9)
-        totalCount += count
-        print range, count
-
-    print "total count : ", totalCount
-
-    #test_traditional_way()
-
-def test_chunks():
-
-    uri = config['inputURI']
-    useShards = config['useShards']
-    slaveOk = config['slaveOk']
-    database = "test"
-    collection = "people"
-
-    splits = MS.fetch_splits_via_chunks(config,uri,useShards,slaveOk);
-    print splits
 

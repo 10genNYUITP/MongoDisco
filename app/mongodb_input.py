@@ -9,7 +9,7 @@ import json
 import logging
 
 def open(url=None, task=None):
-    from mongo_util import getCollection
+    from mongo_util import get_collection
 
     query = son.SON(json.loads(url, object_hook=json_util.object_hook))
     uri = query['inputURI']
@@ -24,7 +24,7 @@ def open(url=None, task=None):
 
     #go around: connect to the sonnection then choose db by ['dbname']
 
-    collection = getCollection(uri)
+    collection = get_collection(uri)
     cursor = collection.find(spec = spec, fields = fields, skip = skip, limit = limit, sort = sort, timeout = timeout)
 
     wrapper = MongoWrapper(cursor)
@@ -58,45 +58,7 @@ class MongoWrapper(object):
 
 
 def input_stream(stream, size, url, params):
-    from scheme_mongodb import open
+    from mongodb_input import open
     mon = open(url)
     return mon
 
-
-'''
-def getConnection(uri):
-    uri_info = uri_parser.parse_uri(uri)
-    nodes = set()
-    host = None
-    port = None
-    nodes.update(uri_info["nodelist"])
-
-    if len(nodes) == 1: #How to handle multiple nodes?
-        for node in nodes:
-            host = node[0]
-            port = node[1]
-
-    connection = Connection(host=host,port=port)
-    
-    return connection
-    
-
-def getCollection(uri):
-
-    uri_info = uri_parser.parse_uri(uri)
-    username = None
-    password = None
-    db = None
-    username = uri_info["username"] or username
-    password = uri_info["password"] or password
-    db = uri_info["database"]
-    col = uri_info["collection"]
-
-    connection = getConnection(uri)
-    
-    if username:
-        if not connection[db].authenticate(username,password):
-            raise ConfigurationError("authentication failed")
-
-    return connection[db][col]
-'''

@@ -1,5 +1,5 @@
 from mongodb_output import mongodb_output
-from scheme_mongodb import input_stream
+from mongodb_input import input_stream
 from disco.worker.classic.func import task_output_stream
 
 
