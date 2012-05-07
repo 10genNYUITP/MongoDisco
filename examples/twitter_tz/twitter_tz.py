@@ -13,6 +13,10 @@ curl https://stream.twitter.com/1/statuses/sample.json -u<user>:<pass> \
 
 '''
 
+# VV hacky way to get app available- solution: install?
+# TODO: ask @Changle (05/06/12, 20:54, AFlock)
+import sys
+sys.path.append('../..')
 from disco.core        import Job, result_iterator
 from mongodb_io        import mongodb_input_stream
 from app.MongoSplitter import calculate_splits
