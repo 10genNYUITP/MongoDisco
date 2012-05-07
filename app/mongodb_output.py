@@ -1,15 +1,17 @@
 
 class MongoOutput(object):
-    '''Output stream for mongoDB 
+    '''Output stream for mongoDB
     '''
     def __init__(self,stream,params):
         from mongo_util import get_connection,get_collection
-        
+
         config = {}
         for key, value in params.__dict__.iteritems():
             config[key] = value
 
-        self.uri =  config.get('output_uri','mongodb://localhost/test.out')
+        self.uri =  config.get('output_uri')
+        if not self.uri:
+            self.uri = 'mongodb://localhost/test.out'
         self.conn = get_connection(self.uri)
         self.coll = get_collection(self.uri)
         self.key_name = config.get('job_output_key','_id')
