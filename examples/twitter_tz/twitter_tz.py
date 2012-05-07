@@ -18,12 +18,15 @@ from mongodb_io        import mongodb_input_stream
 from app.MongoSplitter import calculate_splits
 
 config = {
+        #NYU ITP twitter db VV
+        #"inputURI": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
         "inputURI": "mongodb://localhost/twitter",
         "createInputSplits": True}
 
 
 def map(tweet, params):
-    yield tweet['user'].get('time_zone', "unlisted"), 1
+    if tweet.get('user'):
+        yield tweet['user'].get('time_zone', "unlisted"), 1
 
 
 def reduce(iter, params):
