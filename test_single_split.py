@@ -3,10 +3,10 @@ import logging
 config = {
         "db_name": "test",
         "collection_name": "in",
-        "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.in",
-        "createInputSplits": False,
-        "splitKey": {'_id' : 1}, }
+        "split_size": 1, #MB
+        "input_uri": "mongodb://localhost/test.in",
+        "create_input_splits": False,
+        "split_key": {'_id' : 1}, }
 
 
 

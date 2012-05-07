@@ -7,10 +7,10 @@ Use: from config import config
 
 config = {
         #which collection to use for input to the job
-        "inputURI": "mongodb://localhost/yield_historical.in",
-        "slaveOk": True,
-        "useShards": True,
+        "input_uri": "mongodb://localhost/yield_historical.in",
+        "slave_ok": True,
+        "use_shards": True,
         #Split the data (almost always want True)
-        "createInputSplits": True,
+        "create_input_splits": True,
         #Use mongo chunks as splits
-        "useChunks": True}
+        "use_chunks": True}

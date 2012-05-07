@@ -18,10 +18,10 @@ Description: Default configuration for inserting and reading the data.
 config = {
         "db_name": "test",
         "collection_name": "in",
-        "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.in",
-        "createInputSplits": True,
-        "splitKey": {'_id' : 1},
+        "split_size": 1, #MB
+        "input_uri": "mongodb://localhost/test.in",
+        "create_input_splits": True,
+        "split_key": {'_id' : 1},
         }
 
 
@@ -31,10 +31,10 @@ Description: Configuration used to insert splits (created by MongoSplitter) into
 config2 = {
         "db_name": "test",
         "collection_name": "tempSplit",
-        "splitSize": 1, #MB
-        "inputURI": "mongodb://localhost/test.in",
-        "createInputSplits": True,
-        "splitKey": {'_id' : 1},
+        "split_size": 1, #MB
+        "input_uri": "mongodb://localhost/test.in",
+        "create_input_splits": True,
+        "split_key": {'_id' : 1},
         }
 
 '''
