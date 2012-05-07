@@ -3,7 +3,7 @@ from pymongo import Connection,uri_parser
 from pymongo.errors import ConfigurationError
 
 
-def getConnection(uri):
+def get_connection(uri):
 
     '''
     A better way to implement connection via uri
@@ -29,7 +29,7 @@ def getConnection(uri):
     return connection
     
 
-def getDatabase(uri):
+def get_database(uri):
     uri_info = uri_parser.parse_uri(uri)
     username = None
     password = None
@@ -39,18 +39,18 @@ def getDatabase(uri):
     password = uri_info["password"] or password
     db = uri_info["database"]
 
-    connection = getConnection(uri)
+    connection = get_connection(uri)
     if username:
         if not connection[db].authenticate(username,password):
             raise ConfigurationError("authentication failed")
 
     return connection[db]
 
-def getCollection(uri):
+def get_collection(uri):
 
     uri_info = uri_parser.parse_uri(uri)
     col = uri_info["collection"]
-    database = getDatabase(uri)
+    database = get_database(uri)
 
     return database[col]
 
@@ -59,13 +59,13 @@ if __name__ == '__main__':
     uri = "mongodb://disco:disco@localhost/test.in"
     #uri = "mongodb://localhost/test.in"
 
-    conn = getConnection(uri)
+    conn = get_connection(uri)
     print conn.database_names()
 
-    db = getDatabase(uri)
+    db = get_database(uri)
     print db.collection_names()
 
-    coll = getCollection(uri)
+    coll = get_collection(uri)
     print coll.count()
 
 

@@ -9,8 +9,8 @@ and store/return them in MongoSplit objects
 '''
 from pymongo import uri_parser
 #from sets import Set
-from MongoInputSplit import MongoInputSplit
-from mongo_util import getCollection, getConnection,getDatabase
+from split import MongoInputSplit
+from mongo_util import get_collection, get_connection,get_database
 
 import logging
 import bson
@@ -28,7 +28,7 @@ def calculate_splits(config):
     #database_name = uri_info['database']
     collection_name = uri_info['collection']
 
-    db = getDatabase(uri)
+    db = get_database(uri)
     stats = db.command("collstats", collection_name)
 
     isSharded = False if "sharded" not in stats else stats["sharded"]
@@ -55,8 +55,7 @@ def calculate_splits(config):
         else:
             logging.info("Using Unsharded Split mode \
                     (Calculating multiple splits though)")
-            return calculate_unsharded_splits(config, slaveOk, uri,
-                    collection_name)
+            return calculate_unsharded_splits(config, slaveOk, uri)
 
     else:
         logging.info("Creation of Input Splits is disabled;\
@@ -65,7 +64,7 @@ def calculate_splits(config):
         return calculate_single_split(config)
 
 
-def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
+def calculate_unsharded_splits(config, slaveOk, uri):
     """@todo: Docstring for calculate_unsharded_splits
 
     :returns: @todo
@@ -76,7 +75,7 @@ def calculate_unsharded_splits(config, slaveOk, uri, collection_name):
     splits = []  # will return this
     logging.info("Calculating unsharded splits")
 
-    coll = getCollection(uri)
+    coll = get_collection(uri)
 
     q = {} if not "query" in config else config.get("query")
 
@@ -198,18 +197,18 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
     return splits
 
 
-def fetch_splits_from_shards(config, uri, slaveOk):
+def fetch_splits_from_shards(config, uri, slave_ok):
     """Internal method to fetch splits from shareded db
 
     :returns: The splits
     """
     logging.warn("WARNING getting splits that connect directly to the backend mongods is risky and might not produce correct results")
-    connection = getConnection(uri)
+    connection = get_connection(uri)
 
     configDB = connection["config"]
     shardsColl = configDB["shards"]
 
-    shardSet = set()
+    shardSet = []
     cur = shardsColl.find()
 
     try:
@@ -225,8 +224,18 @@ def fetch_splits_from_shards(config, uri, slaveOk):
         cur = None
 
     splits = []
+
+
     for host in shardSet:
-        splits.append(MongoInputSplit(config.get("input_uri"),
+        new_uri = get_new_URI(uri,host,slave_ok)
+        config['input_uri'] = new_uri
+        splits += calculate_unsharded_splits(config,slave_ok,new_uri)
+        #I think this is better than commented way
+
+    return splits
+        
+    '''
+        splits.append(MongoInputSplit(new_uri,
                 config.get("input_key"),
                 config.get("query"),
                 config.get("fields"),
@@ -236,7 +245,7 @@ def fetch_splits_from_shards(config, uri, slaveOk):
                 config.get("timeout", True)))
 
     return [s.format_uri_with_query() for s in splits]
-
+    '''
 
 def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     """Retrieves split objects based on chunks in mongo
@@ -250,7 +259,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
     logging.debug("fetch_splits_via_chunks: originalQuery: %s" % originalQuery)
 
-    connection = getConnection(uri)
+    connection = get_connection(uri)
 
     configDB = connection["config"]
 
@@ -342,8 +351,8 @@ def get_new_URI(original_URI, new_URI, slave_OK):
     :returns: a new Mongo_URI
     """
 
-    MongoURI_PREFIX = "mongodb://"
-    orig_URI_string = original_URI[len(MongoURI_PREFIX):]
+    MONGO_URI_PREFIX = "mongodb://"
+    orig_URI_string = original_URI[len(MONGO_URI_PREFIX):]
 
     server_end = -1
     server_start = 0
@@ -367,6 +376,6 @@ def get_new_URI(original_URI, new_URI, slave_OK):
         else:
             sb = sb + "?slaveok=" + str(slave_OK).lower()
 
-    ans = MongoURI_PREFIX + sb
+    ans = MONGO_URI_PREFIX + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans)
     return ans

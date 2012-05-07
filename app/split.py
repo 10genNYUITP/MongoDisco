@@ -1,24 +1,16 @@
 #!/usr/bin/env python
 # encoding: utf-8
 '''
-File: MongoInputSplit.py
+File: split.py
 Author: NYU ITP team
 Description: Holds the specification for an individual
-    split as calculated by MongoSplitter.py
+    split as calculated by splitter.py
 '''
 import sys, os, logging
 import json
 from bson import json_util,son
-from mongo_util import getConnection,getCollection
-from pymongo import Connection, uri_parser
-from pymongo.uri_parser import (_partition,
-                                _rpartition,
-                                parse_userinfo,
-                                split_hosts,
-                                split_options,
-                                parse_uri)
 
-# TODO: Find out if we need to extend some disco inputSplit (02/22/12, 21:54, AFlock)
+
 class MongoInputSplit():
     """
     Will hold spec for an individual split,

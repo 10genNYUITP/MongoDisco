@@ -1,4 +1,4 @@
-from DiscoJob import DiscoJob
+from job import DiscoJob
 
 
 import logging
@@ -9,9 +9,10 @@ config = {
         "create_input_splits": True,
         "split_key": {'_id' : 1},
         "output_uri":"mongodb://localhost/test.out",
-        #"job_output_key":"I am the key",
-        "job_output_value":"I ame the value",
-        "job_wait":True
+        "job_output_key":"I am key name",
+        "job_output_value":"I ame value name",
+        "job_wait":True,
+        "print_to_stdout":False
         }
 
 def map(record, params):
@@ -23,19 +24,6 @@ def reduce(iter, params):
         yield word, sum(counts)
 
 if __name__ == '__main__':
-
-
-    '''
-    job = Job().run(
-            #input=["mongodb://localhost/test.modforty"],
-            input= do_split(config),
-            map=map,
-            reduce=reduce,
-            map_input_stream = mongodb_input_stream,
-            reduce_output_stream=mongodb_output_stream)
-
-    job.wait(show=True)
-    '''
 
     DiscoJob(config = config,map = map,reduce = reduce).run()
     
