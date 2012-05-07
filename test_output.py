@@ -1,5 +1,5 @@
 from disco.core import Job, result_iterator
-from mongodb_io import mongodb_output_stream
+from job import DiscoJob
 
 def map(line, params):
     for word in line.split():
@@ -21,11 +21,6 @@ if __name__ == '__main__':
             map=map,
             reduce=reduce,
             map_input_stream = mongodb_input_stream
-            reduce_output_stream=mongodb_output_stream,
-            required_modules= [('mongodb_io','/home/changlewang/Programming/MongoDisco/app/mongodb_io.py'),
-                               ('mongodb_output','/home/changlewang/Programming/MongoDisco/app/mongodb_output.py'),
-                               ('scheme_mongodb','/home/changlewang/Programming/MongoDisco/app/scheme_mongodb.py'),
-                               ('MongoConfigUtil','/home/changlewang/Programming/MongoDisco/app/MongoConfigUtil.py'),
-                               ('mongo_util','/home/changlewang/Programming/MongoDisco/app/mongo_util.py')])
+            reduce_output_stream=mongodb_output_stream)
 
     job.wait(show=True)
