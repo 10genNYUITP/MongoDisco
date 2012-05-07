@@ -11,8 +11,8 @@ import bson
 
 
 '''
-Global variable config: 
-Holds the configuration options for the application. 
+Global variable config:
+Holds the configuration options for the application.
 Default config is the configuration options set in this file.
 '''
 
@@ -20,7 +20,7 @@ config = {
         "job_output_key" : "_id",
         "job_output_value" : "",
         "input_uri" : "",
-        "output_uri" : "",
+        "output_uri" : None,
         "print_to_stdout": False,
         "job_wait":True,
 #        "INPUT_SPLIT_SIZE" : Value to specify how many docs input is split into. Affects the number of mappers.,

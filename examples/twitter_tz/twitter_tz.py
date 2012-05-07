@@ -13,33 +13,18 @@ curl https://stream.twitter.com/1/statuses/sample.json -u<user>:<pass> \
 
 '''
 
-# VV hacky way to get app available- solution: install?
-# TODO: ask @Changle (05/06/12, 20:54, AFlock)
-#import sys
-#sys.path.append('../..')
 from job import DiscoJob
-#from disco.core        import Job, result_iterator
-#from mongodb_io        import mongodb_input_stream
-#from app.MongoSplitter import calculate_splits
-#from MongoDisco
-#
-'''
-config = {
-        #NYU ITP twitter db VV
-        "inputURI": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
-        "inputURI": "mongodb://localhost/twitter",
-        "createInputSplits": True}
-'''
 
 config = {
-        "split_size": 1, #MB
-        "inputURI": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
-        "create_input_splits": True,
+        #NYU ITP twitter db VV
+        #"input_uri": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
+        "input_uri": "mongodb://localhost/test.twitter",
         "split_key": {'_id' : 1},
-        "output_uri":"mongodb://localhost/test.out",
-        "job_wait":True,
-        "print_to_stdout":True
+        "split_size": 1, #MB
+        "createInputSplits": True,
+        "print_to_stdout" : True
         }
+
 
 def map(tweet, params):
     if tweet.get('user'):
@@ -55,12 +40,3 @@ def reduce(iter, params):
 if __name__ == '__main__':
     DiscoJob(config=config, map=map, reduce=reduce).run()
 
-'''
-    job = Job().run(input=calculate_splits(config),
-            map=map,
-            reduce=reduce,
-            map_input_stream=mongodb_input_stream)
-
-    for tz, count in result_iterator(job.wait(show=True)):
-        print "TZ : %s :: Count : %s" % (tz, count)
-'''
