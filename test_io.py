@@ -27,22 +27,13 @@ if __name__ == '__main__':
 
 
     import os, sys, inspect
-    #cmd_folder = os.path.abspath(os.path.split(inspect.getfile( inspect.currentframe() ))[0])
-    ##if cmd_folder not in sys.path:
-    #sys.path.append('/home/changlewang/Programming/MongoDisco/app/MongoConfigUtil')
     
     job = Job().run(
-            #input=["mongodb://localhost/test.modforty"],
             input= do_split(config),
             map=map,
             reduce=reduce,
             map_input_stream = mongodb_input_stream,
-            reduce_output_stream=mongodb_output_stream,
-            required_modules= [('mongodb_io','/home/changlewang/Programming/MongoDisco/app/mongodb_io.py'),
-                               ('mongodb_output','/home/changlewang/Programming/MongoDisco/app/mongodb_output.py'),
-                               ('scheme_mongodb','/home/changlewang/Programming/MongoDisco/app/scheme_mongodb.py'),
-                               ('MongoConfigUtil','/home/changlewang/Programming/MongoDisco/app/MongoConfigUtil.py'),
-                               ('mongo_util','/home/changlewang/Programming/MongoDisco/app/mongo_util.py')])
+            reduce_output_stream=mongodb_output_stream)
 
     job.wait(show=True)
 

@@ -21,7 +21,6 @@ print cursor.count()
 
 count = 0
 for row in cursor:
-    #print row
     count += 1
 
 print count
