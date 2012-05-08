@@ -52,6 +52,7 @@ class MongoInputSplit():
         queryObj['timeout'] = self.timeout
 
         str = json.dumps(queryObj,default=json_util.default)
+        print str
         return str
 
     def __str__(self):

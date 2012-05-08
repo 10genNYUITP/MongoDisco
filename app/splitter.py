@@ -39,6 +39,9 @@ def calculate_splits(config):
     logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? \
         - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
 
+    logging.info("WRAPP")
+    logging.info(config)
+    logging.info("WRAPP")
     if config.get("create_input_splits"):
         logging.info("Creation of Input Splits is enabled.")
         if isSharded and (useShards or useChunks):
@@ -95,7 +98,7 @@ def calculate_unsharded_splits(config, slaveOk, uri):
     cmd["splitVector"]  = full_name
     cmd["maxChunkSize"] = split_size
     cmd["keyPattern"]   = split_key
-    cmd["force"]        = True
+    cmd["force"]        = False
 
     logging.debug("Issuing Command: %s" % cmd)
     data = coll.database.command(cmd)
@@ -233,7 +236,7 @@ def fetch_splits_from_shards(config, uri, slave_ok):
         #I think this is better than commented way
 
     return splits
-        
+
     '''
         splits.append(MongoInputSplit(new_uri,
                 config.get("input_key"),
