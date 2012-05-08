@@ -2,9 +2,10 @@
 # encoding: utf-8
 
 import datetime
-from app.MongoSplitter import calculate_splits
-from disco.core import Job, result_iterator
-from mongodb_io import mongodb_output_stream, mongodb_input_stream
+#from app.MongoSplitter import calculate_splits
+#from disco.core import Job, result_iterator
+#from mongodb_io import mongodb_output_stream, mongodb_input_stream
+from job import DiscoJob
 
 """
 Description: calculate the average 10 year treasury bond yield for given data.
@@ -28,7 +29,7 @@ example record:
 
 #this is the config file for the  mongosplitter
 config = {
-        "inputURI": "mongodb://localhost/yield_historical.in",
+        "input_uri": "mongodb://localhost/test.yield_historical.in",
         "slaveOk": True,
         "useShards": True,
         "createInputSplits": True,
@@ -36,9 +37,8 @@ config = {
 
 
 def map(record, params):
-    time = record['_id']['$date'] / 1000
-    year = datetime.datetime.fromtimestamp(time).date().year
-    yield year, record['bc10year']
+    year = record.get('_id').year
+    yield year, record['bc10Year']
 
 
 def reduce(iter, params):
@@ -49,6 +49,8 @@ def reduce(iter, params):
 
 
 if __name__ == '__main__':
+    DiscoJob(config=config, map=map, reduce=reduce).run()
+    '''
     job = Job().run(input=calculate_splits(config),
             map=map,
             reduce=reduce,
@@ -56,3 +58,4 @@ if __name__ == '__main__':
 
     for year, avg in result_iterator(job.wait(show=True)):
         print "Average 10 Year treasury for %s was %s" % (year, avg)
+    '''
