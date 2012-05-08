@@ -15,14 +15,15 @@ curl https://stream.twitter.com/1/statuses/sample.json -u<user>:<pass> \
 
 from job import DiscoJob
 
+import logging
 config = {
         #NYU ITP twitter db VV
         #"input_uri": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
         "input_uri": "mongodb://localhost/test.twitter",
         "output_uri" : "mongodb://localhost/test.outtwitter",
         "split_key": {'_id' : 1},
-        "split_size": 1, #MB
-        "createInputSplits": True,
+        "split_size": 64, #MB
+        "create_input_splits": True,
         #"print_to_stdout" : True
         }
 

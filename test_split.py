@@ -1,8 +1,7 @@
 import sys, os, logging
 import unittest
 import pymongo
-from app import MongoInputSplit as MI
-from app import MongoSplitter as MS
+from splitter import calculate_splits
 import datetime
 import bson
 
@@ -17,9 +16,9 @@ Description: Default configuration for inserting and reading the data.
 '''
 config = {
         "db_name": "test",
-        "collection_name": "in",
+        "collection_name": "twitter",
         "split_size": 1, #MB
-        "input_uri": "mongodb://localhost/test.in",
+        "input_uri": "mongodb://localhost/test.twitter",
         "create_input_splits": True,
         "split_key": {'_id' : 1},
         }
@@ -49,9 +48,11 @@ class TestSplits(unittest.TestCase):
         #print db.command("collstats", coll.full_name)
 
         #NOTE: need to run this code once to populate the database, after that comment it out
+        '''
         for i in range(40000):
             post = {"name" : i, "date": datetime.datetime.utcnow()}
             coll.insert(post)
+        '''
 
 
 
@@ -59,19 +60,19 @@ class TestSplits(unittest.TestCase):
 
         command = bson.son.SON()
         command['splitVector'] = coll.full_name
-        command['maxChunkSize'] = config.get('splitSize')
+        command['maxChunkSize'] = config.get('split_size')
         command['force'] = False
         command['keyPattern'] = {'_id' : 1}
         results = db.command(command)
 
         man_splits = results.get("splitKeys")
         assert results.get('ok') == 1.0, 'split command did not return with 1.0 ok'
-        #print results
+        print results
         print 'man_splits = ', len(man_splits)
         assert man_splits, 'no splitKeys returned'
 
         #now do it through MongoSplit
-        splits = MS.calculate_splits(config)
+        splits = calculate_splits(config)
 
         assert splits, "MongoSplitter did not return the right splits"
         logging.info("Calculated %s MongoInputSplits" %  len(splits))
