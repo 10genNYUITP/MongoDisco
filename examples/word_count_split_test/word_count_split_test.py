@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from app.MongoSplitter import calculate_splits
+from job import DiscoJob
 from disco.core import Job, result_iterator
-from mongodb_io import mongodb_output_stream, mongodb_input_stream
 import bson
-from app.mongoUtil import getCollection
 
 config = {
-        "inputURI": "mongodb://localhost:30000/test.lines",
-        "outputURI": "mongodb://localhost/test.out",
-        "slaveOk": True,
-        "useShards": True,
-        "createInputSplits": True,
-        "useChunks": True}
+        "input_uri": "mongodb://localhost:30000/test.lines",
+        "output_uri": "mongodb://localhost/test.out",
+        "slave_ok": True,
+        "use_shards": True,
+        "create_input_splits": True,
+        "use_chunks": True}
 
 
 def map(line, params):
@@ -48,10 +46,11 @@ def test(use_shards, use_chunks, slaveOk, useQuery):
         output_table += "_" + slaveOk
 
     config['outputURI'] = "mongodb://localhost:30000/test." + output_table
-    job = Job().run(input=calculate_splits(config),
+    DiscoJob(config=config, map=map, reduce=reduce).run()
+    '''job = Job().run(input=calculate_splits(config),
             map=map,
             reduce=reduce,
-            map_input_stream=mongodb_input_stream)
+            map_input_stream=mongodb_input_stream)'''
 
     for word, count in result_iterator(job.wait(show=True)):
         print word, count

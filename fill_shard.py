@@ -29,7 +29,7 @@ def randomAge():
     age = random.randint(1,100)
     return age
 
-print randomName(),randomAge()
+#print randomName(),randomAge()
 
 
 for i in range(1000):

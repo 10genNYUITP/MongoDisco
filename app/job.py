@@ -14,12 +14,12 @@ from splitter import calculate_splits as do_split
 
 
 class DiscoJob():
-    
+
 
     def __init__(self,config,map,reduce):
-        import config_util 
+        import config_util
 
-        self.config = config_util.config 
+        self.config = config_util.config
         for item in config:
             self.config[item] = config[item]
 
