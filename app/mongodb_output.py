@@ -10,12 +10,10 @@ class MongoOutput(object):
             config[key] = value
 
         self.uri =  config.get('output_uri')
-        if not self.uri:
-            self.uri = 'mongodb://localhost/test.out'
         self.conn = get_connection(self.uri)
         self.coll = get_collection(self.uri)
         self.key_name = config.get('job_output_key','_id')
-        self.value_name = config.get('job_output_value','value')
+        self.value_name = config.get('job_output_value')
 
 
     def add(self,key,val):

@@ -18,9 +18,9 @@ Default config is the configuration options set in this file.
 
 config = {
         "job_output_key" : "_id",
-        "job_output_value" : "",
+        "job_output_value" : "value",
         "input_uri" : "",
-        "output_uri" : None,
+        "output_uri" : "mongodb://localhost/test.out",
         "print_to_stdout": False,
         "job_wait":True,
 #        "INPUT_SPLIT_SIZE" : Value to specify how many docs input is split into. Affects the number of mappers.,

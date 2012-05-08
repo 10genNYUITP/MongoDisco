@@ -20,6 +20,10 @@ class DiscoJob():
         import config_util
 
         self.config = config_util.config
+        #if the user doesn't specify output, print to stdout
+        if not config.get('output_uri') and not config.get('print_to_stdout'):
+            config['print_to_stdout'] = True
+
         for item in config:
             self.config[item] = config[item]
 
