@@ -2,6 +2,7 @@ import sys, os, logging
 import unittest
 import pymongo
 from splitter import calculate_splits
+from mongo_util import get_connection
 import datetime
 import bson
 
@@ -18,7 +19,9 @@ config = {
         "db_name": "test",
         "collection_name": "twitter",
         "split_size": 1, #MB
-        "input_uri": "mongodb://localhost/test.twitter",
+        "use_shards" : True,
+        "use_chunks" : False,
+        "input_uri": "mongodb://ec2-23-20-75-24.compute-1.amazonaws.com:27020/test.twitter",
         "create_input_splits": True,
         "split_key": {'_id' : 1},
         }
@@ -26,7 +29,6 @@ config = {
 
 '''
 Description: Configuration used to insert splits (created by MongoSplitter) into various collections and verify against original data.
-'''
 config2 = {
         "db_name": "test",
         "collection_name": "tempSplit",
@@ -36,13 +38,12 @@ config2 = {
         "split_key": {'_id' : 1},
         }
 
-'''
 Test case to check MongoSplitter.
 '''
 class TestSplits(unittest.TestCase):
     def runTest(self):
         #put 20000 objects in a database, call for a split by hand, then a split by the class
-        conn = pymongo.Connection()
+        conn = get_connection("mongodb://ec2-23-20-75-24.compute-1.amazonaws.com:27020/test.twitter")
         db = conn[config.get('db_name')]
         coll = db[config.get('collection_name')]
         #print db.command("collstats", coll.full_name)
@@ -63,6 +64,7 @@ class TestSplits(unittest.TestCase):
         command['maxChunkSize'] = config.get('split_size')
         command['force'] = False
         command['keyPattern'] = {'_id' : 1}
+        #SON([('splitVector', u'test.twitter'), ('maxChunkSize', 1), ('keyPattern', {'_id': 1}), ('force', False)])
         results = db.command(command)
 
         man_splits = results.get("splitKeys")

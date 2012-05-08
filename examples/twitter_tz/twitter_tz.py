@@ -18,13 +18,15 @@ from job import DiscoJob
 import logging
 config = {
         #NYU ITP twitter db VV
-        #"input_uri": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
-        "input_uri": "mongodb://localhost/test.twitter",
-        "output_uri" : "mongodb://localhost/test.outtwitter",
+        "input_uri": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
+        #"input_uri": "mongodb://localhost/test.twitter",
+        #"output_uri" : "mongodb://localhost/test.outtwitter",
         "split_key": {'_id' : 1},
         "split_size": 64, #MB
+        "use_chunks" : False,
+        "use_shards" : True,
         "create_input_splits": True,
-        #"print_to_stdout" : True
+        "print_to_stdout" : True
         }
 
 
