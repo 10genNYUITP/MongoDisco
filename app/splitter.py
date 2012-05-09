@@ -221,10 +221,6 @@ def fetch_splits_from_shards(config, uri, slave_ok):
             if slashIndex > 0:
                 host = host[slashIndex + 1:]
             shardSet.append(host)
-    finally:
-        if cur != None:
-            cur.close()
-        cur = None
 
     splits = []
 
@@ -279,9 +275,6 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
                 if slashIndex > 0:
                     host = host[slashIndex + 1:]
                 shardMap[row.get('_id')] = host
-        finally:
-            if cur != None:
-                cur.close()
 
     logging.debug("MongoInputFormat.getSplitsUsingChunks(): shard map is: %s" % shardMap)
 
@@ -341,9 +334,6 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
                 config.get("skip", 0),
                 config.get("timeout", True)))
 
-    finally:
-        if cur != None:
-            cur.close()
 
     # return splits in uri format for disco
     return [s.format_uri_with_query() for s in splits]
