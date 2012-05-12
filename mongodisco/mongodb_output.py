@@ -27,6 +27,9 @@ class MongoOutput(object):
 
 
 def mongodb_output(stream,partition,url,params):
+    # This looks like a mistake, but it is intentional.
+    # Due to the way that Disco imports and uses this
+    # function, we must re-import the module here.
     from mongodisco.mongodb_output import MongoOutput
     return MongoOutput(stream,params)
 

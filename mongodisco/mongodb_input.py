@@ -1,30 +1,41 @@
-from bson import json_util
-from bson import son
-from pymongo import uri_parser
+from bson.json_util import object_hook
 import json
 
-def open(url=None, task=None):
-    from mongo_util import get_collection
+from mongodisco.mongo_util import get_collection
 
-    query = son.SON(json.loads(url, object_hook=json_util.object_hook))
-    uri = query['inputURI']
-    uri_info = uri_parser.parse_uri(uri)
-    spec = query['query']
-    fields = query['fields'] 
-    skip = query['skip'] 
-    limit = query['limit'] 
-    timeout = query['timeout'] 
-    sort = query['sort'] 
+'''
+File: mongodb_input.py
+Description:
+'''
+def _open(input_description, task=None):
+    """Return a :class:`~mongodisco.mongodb_input.MongoWrapper`
+    which wraps a cursor selecting just those documents relevant
+    to one particular map operation. `input_description` is
+    a JSON string describing the documents to find, and looks like::
 
+        {  "inputURI": "mongodb://discomaster.zeroclues.net:27017/test.twitter",
+           "keyField": null,
+           "query": {
+             "$query": {},
+             "$min": {"_id": {"$oid": "4fae7a97fa22c41aeb5d78f8"}},
+             "$max": {"_id": {"$oid": "4fae7b27fa22c41aeb5d96b5"}}},
+           "fields": null,
+           "sort": null,
+           "limit": 0,
+           "skip": 0,
+           "timeout": false  }
+    """
+    parsed = json.loads(input_description, object_hook=object_hook)
+    collection = get_collection(parsed['inputURI'])
 
-    #go around: connect to the sonnection then choose db by ['dbname']
-
-    collection = get_collection(uri)
-    cursor = collection.find(spec = spec, fields = fields, skip = skip, limit = limit, sort = sort, timeout = timeout)
-
-    wrapper = MongoWrapper(cursor)
-    return wrapper
-    #WRAPPED!
+    return MongoWrapper(collection.find(
+        spec=parsed['query'],
+        fields=parsed['fields'],
+        skip=parsed['skip'],
+        limit=parsed['limit'],
+        sort=parsed['sort'],
+        timeout=parsed['timeout'],
+    ))
 
 
 class MongoWrapper(object):
@@ -53,7 +64,9 @@ class MongoWrapper(object):
 
 
 def input_stream(stream, size, url, params):
-    from mongodisco.mongodb_input import open
-    mon = open(url)
-    return mon
+    # This looks like a mistake, but it is intentional.
+    # Due to the way that Disco imports and uses this
+    # function, we must re-import the module here.
+    from mongodisco.mongodb_input import _open
+    return _open(url)
 
