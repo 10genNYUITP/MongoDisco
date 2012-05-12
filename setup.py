@@ -4,6 +4,8 @@ use_setuptools('0.6.15')
 from setuptools import setup
 setup(
     name='MongoDisco',
+    description='MongoDB integration with the Disco map-reduce framework.',
+    long_description=file('README').read(),
     version='0.8',
     url='https://github.com/10genNYUITP/MongoDisco',
     license='Apache Software License, Version 2.0',
