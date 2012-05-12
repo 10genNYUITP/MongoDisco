@@ -6,7 +6,7 @@ Author: NYU ITP team
 Description: Holds the specification for an individual
     split as calculated by splitter.py
 '''
-import sys, os, logging
+import logging
 import json
 from bson import json_util,son
 

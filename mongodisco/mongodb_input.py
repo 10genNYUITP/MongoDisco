@@ -1,12 +1,7 @@
-import pymongo
-import bson
 from bson import json_util
-import warnings
-from cStringIO import StringIO
-from pymongo import Connection, uri_parser, ReadPreference
-import bson.son as son
+from bson import son
+from pymongo import uri_parser
 import json
-import logging
 
 def open(url=None, task=None):
     from mongo_util import get_collection
@@ -58,7 +53,7 @@ class MongoWrapper(object):
 
 
 def input_stream(stream, size, url, params):
-    from mongodb_input import open
+    from mongodisco.mongodb_input import open
     mon = open(url)
     return mon
 

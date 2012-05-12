@@ -8,9 +8,8 @@ Description: Will calculate splits for a given collection/database
 and store/return them in MongoSplit objects
 '''
 from pymongo import uri_parser
-#from sets import Set
 from split import MongoInputSplit
-from mongo_util import get_collection, get_connection,get_database
+from mongodisco.mongo_util import get_collection, get_connection, get_database
 
 import logging
 import bson

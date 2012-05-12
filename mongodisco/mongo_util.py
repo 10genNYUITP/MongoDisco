@@ -1,4 +1,3 @@
-import pymongo
 from pymongo import Connection,uri_parser
 from pymongo.errors import ConfigurationError
 

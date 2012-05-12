@@ -8,8 +8,7 @@ Description: Disco Job Wrapper
 '''
 from disco.core import Job, result_iterator
 from disco.worker.classic.worker import Params
-from disco.worker.classic.modutil import locate_modules,find_modules
-from mongodb_io import mongodb_output_stream,mongodb_input_stream
+from mongodisco.mongodb_io import mongodb_output_stream, mongodb_input_stream
 from splitter import calculate_splits as do_split
 
 
@@ -43,11 +42,11 @@ class DiscoJob():
                      reduce = self.reduce,
                      params = self.params,
                      map_input_stream = mongodb_input_stream,
-                     required_modules= ['mongodb_io',
-                                        'mongodb_input',
-                                        'config_util',
-                                        'mongo_util',
-                                        'mongodb_output'])
+                     required_modules= ['mongodisco.mongodb_io',
+                                        'mongodisco.mongodb_input',
+                                        'mongodisco.config_util',
+                                        'mongodisco.mongo_util',
+                                        'mongodisco.mongodb_output'])
             for key, value in result_iterator(self.job.wait(show=True)):
                 print key, value
 
@@ -58,11 +57,11 @@ class DiscoJob():
                      params = self.params,
                      map_input_stream = mongodb_input_stream,
                      reduce_output_stream = mongodb_output_stream,
-                     required_modules= ['mongodb_io',
-                                        'mongodb_input',
-                                        'config_util',
-                                        'mongo_util',
-                                        'mongodb_output'])
+                     required_modules= ['mongodisco.mongodb_io',
+                                        'mongodisco.mongodb_input',
+                                        'mongodisco.config_util',
+                                        'mongodisco.mongo_util',
+                                        'mongodisco.mongodb_output'])
 
             if self.config.get("job_wait",False):
                 self.job.wait(show=True)

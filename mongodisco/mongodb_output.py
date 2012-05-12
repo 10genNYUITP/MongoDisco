@@ -1,9 +1,9 @@
+from mongodisco.mongo_util import get_connection,get_collection
 
 class MongoOutput(object):
     '''Output stream for mongoDB
     '''
     def __init__(self,stream,params):
-        from mongo_util import get_connection,get_collection
 
         config = {}
         for key, value in params.__dict__.iteritems():
@@ -27,8 +27,6 @@ class MongoOutput(object):
 
 
 def mongodb_output(stream,partition,url,params):
-    from mongodb_output import MongoOutput
+    from mongodisco.mongodb_output import MongoOutput
     return MongoOutput(stream,params)
-
-
 

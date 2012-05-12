@@ -6,8 +6,6 @@ File: config_util.py
 Author: NYU ITP Team
 Description: Configuration helper tool for MongoDB related Map/Reduce jobs Instance based, more idiomatic for those who prefer it to the static methoding of ConfigUtil
 '''
-import logging
-import bson
 
 
 '''
