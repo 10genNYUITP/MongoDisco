@@ -212,18 +212,15 @@ def fetch_splits_from_shards(config, uri, slave_ok):
     shardsColl = configDB["shards"]
 
     shardSet = []
+    splits = []
     cur = shardsColl.find()
 
-    try:
-        for row in cur:
-            host = row.get('host')
-            slashIndex = host.find("/")
-            if slashIndex > 0:
-                host = host[slashIndex + 1:]
-            shardSet.append(host)
-
-    splits = []
-
+    for row in cur:
+        host = row.get('host')
+        slashIndex = host.find("/")
+        if slashIndex > 0:
+            host = host[slashIndex + 1:]
+        shardSet.append(host)
 
     for host in shardSet:
         new_uri = get_new_URI(uri,host,slave_ok)
@@ -268,13 +265,12 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
         shardsColl = configDB["shards"]
         cur = shardsColl.find()
 
-        try:
-            for row in cur:
-                host = row.get('host')
-                slashIndex = host.find("/")
-                if slashIndex > 0:
-                    host = host[slashIndex + 1:]
-                shardMap[row.get('_id')] = host
+        for row in cur:
+            host = row.get('host')
+            slashIndex = host.find("/")
+            if slashIndex > 0:
+                host = host[slashIndex + 1:]
+            shardMap[row.get('_id')] = host
 
     logging.debug("MongoInputFormat.getSplitsUsingChunks(): shard map is: %s" % shardMap)
 
@@ -290,49 +286,48 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
     logging.info(cur.count())
     logging.info(chunksCollection.find().count())
 
-    try:
-        numChunks = 0
+    numChunks = 0
 
-        splits = []
+    splits = []
 
-        for row in cur:
-            numChunks += 1
-            minObj = row.get('min')
-            shardKeyQuery = bson.son.SON()
-            min = bson.son.SON()
-            max = bson.son.SON()
+    for row in cur:
+        numChunks += 1
+        minObj = row.get('min')
+        shardKeyQuery = bson.son.SON()
+        min = bson.son.SON()
+        max = bson.son.SON()
 
-            for key in minObj:
-                tMin = minObj[key]
-                tMax = (row.get('max'))[key]
+        for key in minObj:
+            tMin = minObj[key]
+            tMax = (row.get('max'))[key]
 
-                #@to-do do type comparison first?
-                min[key] = tMin
-                max[key] = tMax
+            #@to-do do type comparison first?
+            min[key] = tMin
+            max[key] = tMax
 
-            if originalQuery == None:
-                originalQuery = bson.son.SON()
+        if originalQuery == None:
+            originalQuery = bson.son.SON()
 
-            shardKeyQuery["$query"] = originalQuery
-            shardKeyQuery["$min"] = min
-            shardKeyQuery["$max"] = max
+        shardKeyQuery["$query"] = originalQuery
+        shardKeyQuery["$min"] = min
+        shardKeyQuery["$max"] = max
 
-            inputURI = config.get("input_uri")
+        inputURI = config.get("input_uri")
 
-            if useShards:
-                shardName = row.get('shard')
-                host = shardMap[shardName]
-                inputURI = get_new_URI(inputURI, host, slaveOk)
+        if useShards:
+            shardName = row.get('shard')
+            host = shardMap[shardName]
+            inputURI = get_new_URI(inputURI, host, slaveOk)
 
-            splits.append(MongoInputSplit(
-                inputURI,
-                config.get("input_key"),
-                shardKeyQuery,
-                config.get("fields"),
-                config.get("sort"),
-                config.get("limit", 0),
-                config.get("skip", 0),
-                config.get("timeout", True)))
+        splits.append(MongoInputSplit(
+            inputURI,
+            config.get("input_key"),
+            shardKeyQuery,
+            config.get("fields"),
+            config.get("sort"),
+            config.get("limit", 0),
+            config.get("skip", 0),
+            config.get("timeout", True)))
 
 
     # return splits in uri format for disco
