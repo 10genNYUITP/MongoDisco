@@ -7,11 +7,13 @@ import pymongo
 from pymongo import Connection
 from mongo_util import get_collection
 
+import logging
+
 config = {
         "input_uri":"mongodb://localhost/test.people",
         "output_uri":"mongodb://localhost/test.out",
         "slave_ok":True,
-        "use_shards":True,
+        "use_shards":False,
         "create_input_splits":True,
         "use_chunks":False,
         "job_output_key":"age",

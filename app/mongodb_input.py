@@ -20,12 +20,12 @@ def open(url=None, task=None):
     limit = query['limit'] 
     timeout = query['timeout'] 
     sort = query['sort'] 
-
+    slave_ok = query['slave_ok']
 
     #go around: connect to the sonnection then choose db by ['dbname']
 
     collection = get_collection(uri)
-    cursor = collection.find(spec = spec, fields = fields, skip = skip, limit = limit, sort = sort, timeout = timeout)
+    cursor = collection.find(spec = spec, fields = fields, skip = skip, limit = limit, sort = sort, timeout = timeout, slave_okay = slave_ok)
 
     wrapper = MongoWrapper(cursor)
     return wrapper

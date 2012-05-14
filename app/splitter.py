@@ -31,34 +31,33 @@ def calculate_splits(config):
     db = get_database(uri)
     stats = db.command("collstats", collection_name)
 
-    isSharded = False if "sharded" not in stats else stats["sharded"]
-    useShards = config.get("use_shards", False)
-    useChunks = config.get("use_chunks", False)
-    slaveOk = config.get("slave_ok", False)
+    is_sharded = False if "sharded" not in stats else stats["sharded"]
+    use_shards = config.get("use_shards", False)
+    use_chunks = config.get("use_chunks", False)
+    slave_ok = config.get("slave_ok", False)
 
     logging.info(" Calculate Splits Code ... Use Shards? - %s\nUse Chunks? \
-        - %s\nCollection Sharded? - %s" % (useShards, useChunks, isSharded))
+        - %s\nCollection Sharded? - %s" % (use_shards, use_chunks, is_sharded))
 
     logging.info("WRAPP")
     logging.info(config)
     logging.info("WRAPP")
     if config.get("create_input_splits"):
         logging.info("Creation of Input Splits is enabled.")
-        if isSharded and (useShards or useChunks):
-            if useShards and useChunks:
+        if is_sharded and (use_shards or use_chunks):
+            if use_shards and use_chunks:
                 logging.warn("Combining 'use chunks' and 'read from shards \
                     directly' can have unexpected & erratic behavior in a live \
                     system due to chunk migrations. ")
 
             logging.info("Sharding mode calculation entering.")
-            return calculate_sharded_splits(config, useShards, useChunks,
-                    slaveOk, uri)
+            return calculate_sharded_splits(config, use_shards, use_chunks, uri)
         # perfectly ok for sharded setups to run with a normally calculated split.
         #May even be more efficient for some cases
         else:
             logging.info("Using Unsharded Split mode \
                     (Calculating multiple splits though)")
-            return calculate_unsharded_splits(config, slaveOk, uri)
+            return calculate_unsharded_splits(config, uri)
 
     else:
         logging.info("Creation of Input Splits is disabled;\
@@ -67,7 +66,7 @@ def calculate_splits(config):
         return calculate_single_split(config)
 
 
-def calculate_unsharded_splits(config, slaveOk, uri):
+def calculate_unsharded_splits(config, uri):
     """@todo: Docstring for calculate_unsharded_splits
 
     :returns: @todo
@@ -154,7 +153,8 @@ def _split(config=None, q={}, min=None, max=None):
             config.get("sort"),
             config.get("limit", 0),
             config.get("skip", 0),
-            config.get("timeout", True))
+            config.get("timeout", True),
+            config.get("slave_ok",False))
 
 
 def calculate_single_split(config):
@@ -170,7 +170,8 @@ def calculate_single_split(config):
             config.get("sort"),
             config.get("limit", 0),
             config.get("skip", 0),
-            config.get("timeout", True)))
+            config.get("timeout", True),
+            config.get("slave_ok",False)))
 
     logging.debug("Calculated %d split objects" % len(splits))
     logging.debug("Dump of calculated splits ... ")
@@ -179,17 +180,17 @@ def calculate_single_split(config):
     return [s.format_uri_with_query() for s in splits]
 
 
-def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
+def calculate_sharded_splits(config, use_shards, use_chunks, uri):
     """Calculates splits fetching them directly from a sharded setup
     :returns: A list of sharded splits
     """
     splits = []
-    if useChunks:
-        splits = fetch_splits_via_chunks(config, uri, useShards, slaveOk)
-    elif useShards:
+    if use_chunks:
+        splits = fetch_splits_via_chunks(config, uri, use_shards)
+    elif use_shards:
         logging.warn("Fetching Input Splits directly from shards is potentially \
                 dangerous for data consistency should migrations occur during the retrieval.")
-        splits = fetch_splits_from_shards(config, uri, slaveOk)
+        splits = fetch_splits_from_shards(config, uri)
     else:
         logging.error("Neither useChunks nor useShards enabled; failed to pick a valid state.")
 
@@ -200,7 +201,7 @@ def calculate_sharded_splits(config, useShards, useChunks, slaveOk, uri):
     return splits
 
 
-def fetch_splits_from_shards(config, uri, slave_ok):
+def fetch_splits_from_shards(config, uri):
     """Internal method to fetch splits from shareded db
 
     :returns: The splits
@@ -223,9 +224,9 @@ def fetch_splits_from_shards(config, uri, slave_ok):
         shardSet.append(host)
 
     for host in shardSet:
-        new_uri = get_new_URI(uri,host,slave_ok)
+        new_uri = get_new_URI(uri,host)
         config['input_uri'] = new_uri
-        splits += calculate_unsharded_splits(config,slave_ok,new_uri)
+        splits += calculate_unsharded_splits(config,new_uri)
         #I think this is better than commented way
 
     return splits
@@ -243,13 +244,13 @@ def fetch_splits_from_shards(config, uri, slave_ok):
     return [s.format_uri_with_query() for s in splits]
     '''
 
-def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
+def fetch_splits_via_chunks(config, uri, use_shards):
     """Retrieves split objects based on chunks in mongo
 
     :returns: The splits
     """
     originalQuery = config.get("query")
-    if useShards:
+    if use_shards:
         logging.warn("WARNING getting splits that connect directly to the \
                 backend mongods is risky and might not produce correct results")
 
@@ -261,7 +262,7 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
     shardMap = {}
 
-    if useShards:
+    if use_shards:
         shardsColl = configDB["shards"]
         cur = shardsColl.find()
 
@@ -314,10 +315,10 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
 
         inputURI = config.get("input_uri")
 
-        if useShards:
+        if use_shards:
             shardName = row.get('shard')
             host = shardMap[shardName]
-            inputURI = get_new_URI(inputURI, host, slaveOk)
+            inputURI = get_new_URI(inputURI, host)
 
         splits.append(MongoInputSplit(
             inputURI,
@@ -327,14 +328,15 @@ def fetch_splits_via_chunks(config, uri, useShards, slaveOk):
             config.get("sort"),
             config.get("limit", 0),
             config.get("skip", 0),
-            config.get("timeout", True)))
+            config.get("timeout", True),
+            config.get("slave_ok",False)))
 
 
     # return splits in uri format for disco
     return [s.format_uri_with_query() for s in splits]
 
 
-def get_new_URI(original_URI, new_URI, slave_OK):
+def get_new_URI(original_URI, new_URI):
     """
     :returns: a new Mongo_URI
     """
@@ -353,17 +355,10 @@ def get_new_URI(original_URI, new_URI, slave_OK):
         server_end = idx
 
     idx = orig_URI_string.find("@")
-
     server_start = idx + 1
 
     sb = orig_URI_string[0:server_start] + new_URI + orig_URI_string[server_end:]
-
-    if slave_OK is not None:
-        if "?" in orig_URI_string:
-            sb = sb + "&slaveok=" + str(slave_OK).lower()
-        else:
-            sb = sb + "?slaveok=" + str(slave_OK).lower()
-
     ans = MONGO_URI_PREFIX + sb
     logging.debug("get_new_URI(): original " + original_URI + " new uri: " + ans)
+
     return ans

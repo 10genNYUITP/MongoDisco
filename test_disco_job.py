@@ -6,10 +6,9 @@ import logging
 config = {
         "split_size": 1, #MB
         "input_uri": "mongodb://localhost/test.modforty",
-        "create_input_splits": True,
+        "create_input_splits": False,
         "split_key": {'_id' : 1},
         "output_uri":"mongodb://localhost/test.out",
-        "job_output_key":"I am key name",
         "job_output_value":"I ame value name",
         "job_wait":True,
         "print_to_stdout":False
