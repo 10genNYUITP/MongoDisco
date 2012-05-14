@@ -29,12 +29,12 @@ config = {
         "create_input_splits" : True,
         "splits_use_shards" : False,
         "splits_use_chunks" : True,
-        "slaveok" : False,
+        "slave_ok" : False,
         "limit" : 0,
         "skip" : 0,
         "inputKey" : None,
         "sort" : None,
-        "timeout" : False,
+        "timeout" : True,
         "fields" : None,
         "query" : {}
         }

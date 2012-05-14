@@ -17,7 +17,7 @@ class MongoInputSplit():
     and is able to pass that split's data to disco
     """
 
-    def __init__(self, inputURI, keyField, query, fields=None, sort=None, limit=0, skip=0, timeout=True):
+    def __init__(self, inputURI, keyField, query, fields=None, sort=None, limit=0, skip=0, timeout=True,slave_ok=False):
         self.inputURI = inputURI
         self.keyField = keyField
         self.query = query
@@ -26,6 +26,7 @@ class MongoInputSplit():
         self.limit = limit
         self.skip = skip
         self.timeout = timeout
+        self.slave_ok = slave_ok
 
 
         logging.info("LOOK HERE")
@@ -50,9 +51,9 @@ class MongoInputSplit():
         queryObj['limit'] = self.limit
         queryObj['skip'] = self.skip
         queryObj['timeout'] = self.timeout
+        queryObj['slave_ok'] = self.slave_ok
 
         str = json.dumps(queryObj,default=json_util.default)
-        print str
         return str
 
     def __str__(self):
