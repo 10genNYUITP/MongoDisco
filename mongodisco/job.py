@@ -68,7 +68,6 @@ class DiscoJob():
                      map_input_stream = mongodb_input_stream,
                      required_modules= ['mongodisco.mongodb_io',
                                         'mongodisco.mongodb_input',
-                                        'mongodisco.config_util',
                                         'mongodisco.mongo_util',
                                         'mongodisco.mongodb_output'])
             for key, value in result_iterator(self.job.wait(show=True)):
@@ -83,7 +82,6 @@ class DiscoJob():
                      reduce_output_stream = mongodb_output_stream,
                      required_modules= ['mongodisco.mongodb_io',
                                         'mongodisco.mongodb_input',
-                                        'mongodisco.config_util',
                                         'mongodisco.mongo_util',
                                         'mongodisco.mongodb_output'])
 
