@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import datetime
-from job import DiscoJob
-#from disco.core import Job, result_iterator
-
 """
 Description: calculate the average 10 year treasury bond yield for given data.
 Note: run parse_yield_historical.py first to populate the mongodb with data.
@@ -41,19 +37,13 @@ def map(record, params):
 
 
 def reduce(iter, params):
-    from disco.util import kvgroup, ilen
+    from disco.util import kvgroup
     for year, bid_prices in kvgroup(sorted(iter)):
-        #avg = sum(bid_prices) /sum(1 for j in bid_prices )
-
         bd = [i for i in bid_prices]
-        #yield year, sum([i for i in bid_prices])/ len([i for i in bid_prices])
         yield year, sum(bd)/ len(bd)
 
 
 if __name__ == '__main__':
+    from mongodisco.job import DiscoJob
     DiscoJob(config=config, map=map, reduce=reduce).run()
 
-    '''
-    for year, avg in result_iterator(job.wait(show=True)):
-        print "Average 10 Year treasury for %s was %s" % (year, avg)
-    '''

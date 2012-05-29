@@ -1,0 +1,3 @@
+include README
+include distribute_setup.py
+recursive-include mongodisco *.py

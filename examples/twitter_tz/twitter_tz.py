@@ -13,9 +13,6 @@ curl https://stream.twitter.com/1/statuses/sample.json -u<user>:<pass> \
 
 '''
 
-from job import DiscoJob
-
-import logging
 config = {
         #NYU ITP twitter db VV
         "input_uri": "mongodb://ec2-107-22-139-80.compute-1.amazonaws.com:27017/test.twitter",
@@ -42,5 +39,6 @@ def reduce(iter, params):
 
 
 if __name__ == '__main__':
+    from mongodisco.job import DiscoJob
     DiscoJob(config=config, map=map, reduce=reduce).run()
 

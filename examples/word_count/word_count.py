@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-from job import DiscoJob
-
 '''
 File: word_count.py
 Description: An example that tests the MongoHadoop adapter to read a text
@@ -35,6 +33,6 @@ def reduce(iter, params):
 
 
 if __name__ == '__main__':
-
+    from mongodisco.job import DiscoJob
     DiscoJob(config=config, map=map, reduce=reduce).run()
 
