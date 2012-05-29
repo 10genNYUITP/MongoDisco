@@ -299,13 +299,9 @@ def fetch_splits_via_chunks(config, uri, use_shards):
     logging.info(chunksCollection.find().count())
 
     numChunks = 0
-<<<<<<< HEAD
 
     splits = []
 
-=======
-    splits = []
->>>>>>> 00dae17978f86e2ed82487469e1ba362307b032e
     for row in cur:
         numChunks += 1
         minObj = row.get('min')
@@ -330,17 +326,10 @@ def fetch_splits_via_chunks(config, uri, use_shards):
 
         inputURI = config.get("input_uri")
 
-<<<<<<< HEAD
         if use_shards:
             shardName = row.get('shard')
             host = shardMap[shardName]
             inputURI = get_new_URI(inputURI, host)
-=======
-        if useShards:
-            shardName = row.get('shard')
-            host = shardMap[shardName]
-            inputURI = get_new_URI(inputURI, host, slaveOk)
->>>>>>> 00dae17978f86e2ed82487469e1ba362307b032e
 
         splits.append(MongoInputSplit(
             inputURI,
@@ -350,12 +339,8 @@ def fetch_splits_via_chunks(config, uri, use_shards):
             config.get("sort"),
             config.get("limit", 0),
             config.get("skip", 0),
-<<<<<<< HEAD
             config.get("timeout", True),
             config.get("slave_ok",False)))
-=======
-            config.get("timeout", True)))
->>>>>>> 00dae17978f86e2ed82487469e1ba362307b032e
 
 
     # return splits in uri format for disco

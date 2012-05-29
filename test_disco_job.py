@@ -1,4 +1,4 @@
-from job import DiscoJob
+from mongodisco.job import DiscoJob
 
 
 import logging
