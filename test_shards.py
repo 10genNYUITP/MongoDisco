@@ -1,11 +1,11 @@
 import time
 from job import DiscoJob
 from disco.core import Job,result_iterator
-from mongodb_io import mongodb_output_stream,mongodb_input_stream
-from splitter import calculate_splits as do_split
+from mongodisco.mongodb_io import mongodb_output_stream,mongodb_input_stream
+from mongodisco.splitter import calculate_splits as do_split
 import pymongo
 from pymongo import Connection
-from mongo_util import get_collection
+from mongodisco.mongo_util import get_collection
 
 import logging
 
@@ -13,9 +13,9 @@ config = {
         "input_uri":"mongodb://localhost/test.people",
         "output_uri":"mongodb://localhost/test.out",
         "slave_ok":True,
-        "use_shards":False,
+        "use_shards":True,
         "create_input_splits":True,
-        "use_chunks":False,
+        "use_chunks":True,
         "job_output_key":"age",
         "job_output_value":"number"
         }
@@ -54,5 +54,6 @@ if __name__ == '__main__':
 
 
     DiscoJob(config=config,map=map,reduce=reduce).run()
+    #test_traditional_way();
     
 
