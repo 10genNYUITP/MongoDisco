@@ -15,11 +15,9 @@ Configuration settings for Mongo-Disco adapter for this example
 config = {
         "input_uri": "mongodb://localhost/test.wc",
         "output_uri": "mongodb://localhost/test.out",
-        "slaveOk": True,
-        "useShards": True,
-        "createInputSplits": True,
-        "useChunks": True,
-        "print_to_stdout" : True}
+        "slave_ok": True,
+        "create_input_splits": True,
+        "print_to_stdout" : False}
 
 
 def map(word, params):

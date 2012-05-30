@@ -49,6 +49,7 @@ def _open(input_description, task=None):
         limit=parsed['limit'],
         sort=parsed['sort'],
         timeout=parsed['timeout'],
+        slave_okay=parsed['slave_ok']
     ))
 
 

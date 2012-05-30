@@ -48,10 +48,7 @@ class MongoInputSplit():
 
     def format_uri_with_query(self):
         """
-        returns a formatted uri like scheme_mongo expects
-        we put the query object in a json'd list so we can put it back
-        into an ordered SON
-        mongodb://local/test.in?query=<json of query>&limit=234&skip=293
+        returns a json-format str as disco input uri
         """
         base = self.inputURI
         queryObj = son.SON()

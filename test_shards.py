@@ -1,5 +1,5 @@
 import time
-from job import DiscoJob
+from mongodisco.job import DiscoJob
 from disco.core import Job,result_iterator
 from mongodisco.mongodb_io import mongodb_output_stream,mongodb_input_stream
 from mongodisco.splitter import calculate_splits as do_split
@@ -15,7 +15,7 @@ config = {
         "slave_ok":True,
         "use_shards":True,
         "create_input_splits":True,
-        "use_chunks":True,
+        "use_chunks":False,
         "job_output_key":"age",
         "job_output_value":"number"
         }
