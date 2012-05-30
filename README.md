@@ -3,27 +3,29 @@
 The MongoDB Disco Adapter is a plugin which connect MongoDB and Disco MapRedcue framework by enabling users the ability to use MongoDB as an data input and/or an output source.
 
 ##Prerequisites
-For each machine in disco clusters, it need following:
-Python
-PyMongo
-Disco
+For each machine in a disco cluster, it need following:
+-Python
+-PyMongo
+-Disco
 
 For instructions to setup disco clusters, please refer to the the guide(http://discoproject.org/doc/disco/start/install.html) in disco project website.
 
 ##Installation
-1. Check out the latest source code in github
+1.  Check out the latest source code in github
     git clone https://github.com/10genNYUITP/MongoDisco MongoDisco
 
-2. Go to MongoDisco folder, and run the setup.py file to install MongoDisco package
-   python setup.py install 
-   Note: it may request administrator privilege to run the script
+2.  Go to MongoDisco folder, and run the setup.py file to install MongoDisco package
+    python setup.py install 
+    Note: it may request administrator privilege to run the script
 
 It’s done! Start hacking!
 
 ##Example
 Word Counting is a classic example for MapReduce framework. It could be done extremely easily using the MongoDB Disco Adapter.
 
-Step 1. Users need to specify the configuration for this job. For example, users could specify where the input data is stored and how they would like to store output data by providing a mongodb uri.
+Step 1. Users need to specify the configuration for this job.
+
+For example, users could specify where the input data is stored and how they would like to store output data by providing a mongodb uri.
 
 config = {
         "input_uri": "mongodb://localhost/test.in",
@@ -37,6 +39,7 @@ You can find more detailed configuration in the appendix.
 Here, we assume we assume that input data is in database “test”, collection “in”, and we want to split data on “_id” field by setting the split_size equal to 1 Megabyte. The result would be written back to collection “out” at last.
 
 Step 2. Write up its own map function
+
 Here we would like to read the value under the field “word” and count it, so the map function would like following:
 
 def map(doc, params):
@@ -45,6 +48,7 @@ def map(doc, params):
 Note: doc is an ordinary document return by mongodb query. You can perform any operations on it as MongoDB allowed.
 
 Setup 3. Write up reduce function
+
 As we already get key-value generators from the map process, we only need perform sum operation for each word.
 
 def reduce(iter, params):
