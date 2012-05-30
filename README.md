@@ -88,3 +88,4 @@ Configuration for DiscoJob
 <tr><td>job_output_value</td><td>“value”</td><td>field name for output value</td></tr>
 </table>
 
+
