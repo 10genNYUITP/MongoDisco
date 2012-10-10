@@ -34,7 +34,7 @@ class MongoOutput(object):
         result_dict = {}
         result_dict[self.key_name] = key
         result_dict[self.value_name] = val
-        self.coll.insert(result_dict)
+        self.coll.save(result_dict)
 
     def close(self):
         self.conn.close()
