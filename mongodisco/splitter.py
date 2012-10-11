@@ -170,7 +170,7 @@ def _split(config=None, q={}, min=None, max=None):
 def calculate_single_split(config):
     splits = []
     logging.info("calculating single split")
-    query = bson.son.SON()
+    query = bson.son.SON(config.get("query", {}))
 
     splits.append(MongoInputSplit(
             config.get("input_uri"),
