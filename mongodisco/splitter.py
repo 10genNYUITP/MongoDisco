@@ -109,8 +109,8 @@ def calculate_unsharded_splits(config, uri):
     cmd["keyPattern"]   = split_key
     cmd["force"]        = False
 
-    split_max = config.get('split_max', None)
-    split_min = config.get('split_min', None)
+    split_max = config.get('split_max')
+    split_min = config.get('split_min')
     if split_min is not None and split_max is not None:
         cmd["min"] = split_min
         cmd["max"] = split_max
