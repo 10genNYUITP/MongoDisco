@@ -109,6 +109,12 @@ def calculate_unsharded_splits(config, uri):
     cmd["keyPattern"]   = split_key
     cmd["force"]        = False
 
+    split_max = config.get('split_max', None)
+    split_min = config.get('split_min', None)
+    if split_min is not None and split_max is not None:
+        cmd["min"] = split_min
+        cmd["max"] = split_max
+
     logging.debug("Issuing Command: %s" % cmd)
     data = coll.database.command(cmd)
     logging.debug("%r" % data)
@@ -130,11 +136,11 @@ def calculate_unsharded_splits(config, uri):
     else:
         logging.info("Calculated %s splits" % len(split_data))
 
-        last_key = None
+        last_key = split_min
         for bound in split_data:
             splits.append(_split(config, q, last_key, bound))
             last_key = bound
-        splits.append(_split(config, q, last_key, None))
+        splits.append(_split(config, q, last_key, split_max))
 
     return [s.format_uri_with_query() for s in splits]
 
@@ -170,7 +176,8 @@ def _split(config=None, q={}, min=None, max=None):
 def calculate_single_split(config):
     splits = []
     logging.info("calculating single split")
-    query = bson.son.SON(config.get("query", {}))
+    query = bson.son.SON()
+    query["$query"] = config.get("query", {})
 
     splits.append(MongoInputSplit(
             config.get("input_uri"),
