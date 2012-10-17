@@ -28,13 +28,21 @@ class MongoOutput(object):
         self.coll = get_collection(self.uri)
         self.key_name = config.get('job_output_key','_id')
         self.value_name = config.get('job_output_value')
+        self.add_action = config.get('add_action', 'insert')
+        self.add_upsert = config.get('add_upsert', False)
 
 
     def add(self,key,val):
         result_dict = {}
         result_dict[self.key_name] = key
         result_dict[self.value_name] = val
-        self.coll.insert(result_dict)
+        if self.add_action == 'insert':
+            self.coll.insert(result_dict)
+        elif self.add_action == 'save':
+            self.coll.save(result_dict)
+        elif self.add_action == 'update':
+            #In this case val needs to be an object containing commands like $set, $inc, $unset, etc
+            self.coll.update({self.key_name: key}, val, upsert=self.add_upsert)
 
     def close(self):
         self.conn.close()
